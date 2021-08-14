@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from __future__ import print_function
-import re
 
 from odrive_interface.msg import VelocityControl
 from odrive_interface.srv import *
@@ -10,7 +9,6 @@ import time
 import rospy
 import odrive
 from odrive.enums import *
-from std_msgs.msg import String
 
 # Global variables used throughout the program
 requested_state_resolved = False
