@@ -1,3 +1,2 @@
-Header header
 float32 axis0_velocity
 float32 axis1_velocity
