@@ -13,18 +13,30 @@ from odrive.enums import *
 # Global variables used throughout the program
 requested_state_resolved = False
 
+def has_errors():
+    global my_drive
+
+    if (my_drive.axis0.errors > 0) or (my_drive.axis1.errors > 0):
+        return True
+
+    return False
+
 def handle_change_control_mode(req: ChangeControlModeRequest):
     # error handling
     if (req.axis != 0 and req.axis != 1) or (req.requestedControlMode > 3 or req.requestedControlMode < 0):
-        print("Incorrect service call to: ChangeControlMode\nNo action performed.")
+        print("Incorrect service call parameters to: ChangeControlMode\nNo action performed.")
         return ChangeControlModeResponse(False)
     
     global my_drive 
        
+    if (req.axis == 0):
+        my_drive.axis0.controller.config.control_mode = req.requestedControlMode
+    else:
+        my_drive.axis1.controller.config.control_mode = req.requestedControlMode
 
-    # TODO: do the stuff
+    time.sleep(0.25)    
     
-    return ChangeControlModeResponse(True)
+    return ChangeControlModeResponse(has_errors())
 
 def resolve_requested_state(req: ChangeStateRequest):
     global my_drive, requested_state_resolved    
@@ -32,6 +44,9 @@ def resolve_requested_state(req: ChangeStateRequest):
     print("Attempting to change the current state to the requested state...\n")
     time.sleep(1)
     
+    # we need to determine which axis this request is for, and we need to determine
+    # if this is a calibration attempt or a regular state change attempt
+    # a calibration attempt should return the state back to idle
     if (req.axis == 0):
         my_drive.axis0.requested_state = req.requested_state
         if (req.isCalibration):
@@ -49,29 +64,27 @@ def resolve_requested_state(req: ChangeStateRequest):
             while my_drive.axis1.current_state != req.requested_state:
                 time.sleep(0.1)
 
-    requested_state_resolved = True
+    # read for any errors to determine if the requested calibration or state changed worked out ok    
+    requested_state_resolved = has_errors()
     
-
 
 def handle_change_state(req: ChangeStateRequest):
     # error handling
     if (req.axis != 0 and req.axis != 1) or (req.requestedState > 13 or req.requestedState < 0 or req.requestedState == 5):
-        print("Incorrect service call to: ChangeState\nNo action performed.")
+        print("Incorrect service call parameters to: ChangeState\nNo action performed.")
         return ChangeStateResponse(False)
     
     global my_drive, requested_state_resolved
     
+    # resolve the request to change the state in another thread so we can set a timeout for it
     requested_state_resolved = False
     thread = threading.Thread(target=resolve_requested_state(req))
     thread.start()
-    
     thread.join(timeout=10)
 
-    if not requested_state_resolved:
-        print('Requested state took too long to execute.\n')
-    else:
-        print('Requested state successfully resolved!\n')
-
+    if requested_state_resolved:
+        print('Requested state successfully resolved!\n')    
+        
     return ChangeStateResponse(requested_state_resolved)
 
 
