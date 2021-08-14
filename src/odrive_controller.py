@@ -75,7 +75,7 @@ def velocity_callback(data: VelocityControl):
     # TODO: Have ODrive try to set velocities for each axis
 
 def setup_node():    
-    rospy.init_node('odrive_interface', anonymous=True)
+    rospy.init_node('odrive_interface')
     rospy.Subscriber("odrive_cmd_vel", VelocityControl, velocity_callback)
     rospy.Service('change_control_mode', ChangeControlMode, handle_change_control_mode)
     rospy.Service('change_state', ChangeState, handle_change_state)
