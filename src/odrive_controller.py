@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 from __future__ import print_function
+import re
 
 from odrive_interface.msg import VelocityControl
 from odrive_interface.srv import *
 import sys
+import threading
+import time
 import rospy
 import odrive
 from odrive.enums import *
 from std_msgs.msg import String
 
+# Global variables used throughout the program
+requested_state_resolved = False
 
 def handle_change_control_mode(req: ChangeControlModeRequest):
     # error handling
@@ -22,6 +27,25 @@ def handle_change_control_mode(req: ChangeControlModeRequest):
     
     return ChangeControlModeResponse(True)
 
+def resolve_requested_state(axis, state):
+    global my_drive, requested_state_resolved
+
+    print("Attempting to change the current state to the requested state...\n")
+
+    if (axis == 0):
+        my_drive.axis0.requested_state = state
+        # wait for the requested state to resolve
+        while my_drive.axis0.current_state != state:
+            time.sleep(0.1)
+    else:
+        my_drive.axis1.requested_state = state
+        # wait for the requested state to resolve
+        while my_drive.axis1.current_state != state:
+            time.sleep(0.1)
+
+    requested_state_resolved = True
+    
+
 
 def handle_change_state(req: ChangeStateRequest):
     # error handling
@@ -29,13 +53,20 @@ def handle_change_state(req: ChangeStateRequest):
         print("Incorrect service call to: ChangeState\nNo action performed.")
         return ChangeStateResponse(False)
     
-    global my_drive
-
-    # TODO: do the stuff
-    if (req.axis == 0):
-        my_drive.axis0.requested_state = req.requestedState 
+    global my_drive, requested_state_resolved
     
-    return ChangeStateResponse(True)
+    requested_state_resolved = False
+    thread = threading.Thread(target=resolve_requested_state(req.axis, req.requestedState))
+    thread.start()
+    
+    thread.join(timeout=10)
+
+    if not requested_state_resolved:
+        print('Requested state took too long to execute.\n')
+    else:
+        print('Requested state successfully resolved!\n')
+
+    return ChangeStateResponse(requested_state_resolved)
 
 
 def velocity_callback(data: VelocityControl):
