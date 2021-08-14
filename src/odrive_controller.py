@@ -83,15 +83,17 @@ def setup_node():
     rospy.spin()
 
 
-# try to find ODrive, if no ODrive can be found within 5 seconds, terminate program/node and notify user
-print("Trying to connect to ODrive...\n")
-try:
-    my_drive = odrive.find_any(timeout=5)
-except TimeoutError:
-    print("Could not find an ODrive.\nProgram will now terminate.")
-    sys.exit()
-print("ODrive detected, launching odrive_interface node...\n")
         
 if __name__ == '__main__':    
-    setup_node()
+    try:
+        # try to find ODrive, if no ODrive can be found within 5 seconds, terminate program/node and notify user
+        print("Trying to find an ODrive...\n")
+        my_drive = odrive.find_any(timeout=5)
+        print("ODrive detected, launching odrive_interface node...\n")    
+        setup_node()
+    except TimeoutError:
+        print("Could not find an ODrive.")    
+        sys.exit()
+    
+    
     
