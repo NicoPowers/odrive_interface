@@ -4,14 +4,17 @@ import rospy
 import odrive
 from odrive.enums import *
 from std_msgs.msg import String
+from odrive_interface.msg import VelocityControl
 
-def odrive_cmd_callback(data):
-    print("Received command: ", data)
+def velocity_callback(data: VelocityControl):
+    print("Received axis0 velocity: ", data.axis0_velocity)
+    print("Received axis1 velocity: ", data.axis1_velocity)
+    # TODO: Have ODrive try to set velocities for each axis
 
 def setup_node():
     print("Waiting for data...")
-    rospy.init_node('odrive_usb_interface', anonymous=True)
-    rospy.Subscriber("odrive_cmd", String, odrive_cmd_callback)
+    rospy.init_node('odrive_velocity_control', anonymous=True)
+    rospy.Subscriber("odrive_cmd", VelocityControl, velocity_callback)
     rospy.spin()
 
 
@@ -21,6 +24,6 @@ def connect_to_odrive():
     
         
 if __name__ == '__main__':
-    connect_to_odrive()
+    # connect_to_odrive()
     setup_node()
     
