@@ -19,27 +19,35 @@ def handle_change_control_mode(req: ChangeControlModeRequest):
         print("Incorrect service call to: ChangeControlMode\nNo action performed.")
         return ChangeControlModeResponse(False)
     
-    global my_drive    
+    global my_drive 
+       
 
     # TODO: do the stuff
     
     return ChangeControlModeResponse(True)
 
-def resolve_requested_state(axis, state):
-    global my_drive, requested_state_resolved
+def resolve_requested_state(req: ChangeStateRequest):
+    global my_drive, requested_state_resolved    
 
     print("Attempting to change the current state to the requested state...\n")
-
-    if (axis == 0):
-        my_drive.axis0.requested_state = state
-        # wait for the requested state to resolve
-        while my_drive.axis0.current_state != state:
-            time.sleep(0.1)
+    time.sleep(1)
+    
+    if (req.axis == 0):
+        my_drive.axis0.requested_state = req.requested_state
+        if (req.isCalibration):
+            while my_drive.axis0.current_state != AXIS_STATE_IDLE:
+                time.sleep(0.1)
+        else:            
+            while my_drive.axis0.current_state != req.requested_state:
+                time.sleep(0.1)
     else:
-        my_drive.axis1.requested_state = state
-        # wait for the requested state to resolve
-        while my_drive.axis1.current_state != state:
-            time.sleep(0.1)
+        my_drive.axis1.requested_state = req.requested_state        
+        if (req.isCalibration):
+            while my_drive.axis1.current_state != AXIS_STATE_IDLE:
+                time.sleep(0.1)
+        else:
+            while my_drive.axis1.current_state != req.requested_state:
+                time.sleep(0.1)
 
     requested_state_resolved = True
     
@@ -54,7 +62,7 @@ def handle_change_state(req: ChangeStateRequest):
     global my_drive, requested_state_resolved
     
     requested_state_resolved = False
-    thread = threading.Thread(target=resolve_requested_state(req.axis, req.requestedState))
+    thread = threading.Thread(target=resolve_requested_state(req))
     thread.start()
     
     thread.join(timeout=10)
