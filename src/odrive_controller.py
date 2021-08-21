@@ -16,7 +16,11 @@ requested_state_resolved = False
 def has_errors():
     global my_drive
 
-    if (my_drive.axis0.errors > 0) or (my_drive.axis1.errors > 0):
+    if (my_drive.axis0.error > 0):
+        print("Error with axis 0")
+        return True
+    elif (my_drive.axis1.error > 0):
+        print("Error with axis 1")
         return True
 
     return False
@@ -36,7 +40,7 @@ def handle_change_control_mode(req: ChangeControlModeRequest):
 
     time.sleep(0.25)    
     
-    return ChangeControlModeResponse(has_errors())
+    return ChangeControlModeResponse(not has_errors())
 
 def resolve_requested_state(req: ChangeStateRequest):
     global my_drive, requested_state_resolved    
@@ -47,25 +51,29 @@ def resolve_requested_state(req: ChangeStateRequest):
     # we need to determine which axis this request is for, and we need to determine
     # if this is a calibration attempt or a regular state change attempt
     # a calibration attempt should return the state back to idle
+
+    if (req.requestedState == 0):
+        req.requestedState = 1
+        
     if (req.axis == 0):
-        my_drive.axis0.requested_state = req.requested_state
+        my_drive.axis0.requested_state = req.requestedState
         if (req.isCalibration):
             while my_drive.axis0.current_state != AXIS_STATE_IDLE:
                 time.sleep(0.1)
         else:            
-            while my_drive.axis0.current_state != req.requested_state:
+            while my_drive.axis0.current_state != req.requestedState:
                 time.sleep(0.1)
-    else:
-        my_drive.axis1.requested_state = req.requested_state        
+    else:        
+        my_drive.axis1.requested_state = req.requestedState        
         if (req.isCalibration):
             while my_drive.axis1.current_state != AXIS_STATE_IDLE:
                 time.sleep(0.1)
         else:
-            while my_drive.axis1.current_state != req.requested_state:
+            while my_drive.axis1.current_state != req.requestedState:
                 time.sleep(0.1)
 
     # read for any errors to determine if the requested calibration or state changed worked out ok    
-    requested_state_resolved = has_errors()
+    requested_state_resolved = not has_errors()
     
 
 def handle_change_state(req: ChangeStateRequest):
