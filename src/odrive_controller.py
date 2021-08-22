@@ -92,9 +92,17 @@ def handle_change_state(req: ChangeStateRequest):
     thread.start()
     thread.join(timeout=10)
 
-    if requested_state_resolved:
-        print('Requested state successfully resolved!\n')    
-        
+    # check if thread timed out or not
+    if (thread.isAlive()):
+        print("Requested state could not resolve in time")
+        return ChangeStateResponse(False)
+
+    else:
+        if requested_state_resolved:
+            print('Requested state successfully resolved!\n')    
+        else:
+            print('Requested state NOT successfully resolved!\n')
+            
     return ChangeStateResponse(requested_state_resolved)
 
 
