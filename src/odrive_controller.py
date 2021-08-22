@@ -40,7 +40,7 @@ def handle_change_control_mode(req: ChangeControlModeRequest):
     else:
         my_drive.axis1.controller.config.control_mode = req.requestedControlMode
 
-    time.sleep(0.25)    
+    time.sleep(1.0)    
     
     return ChangeControlModeResponse(not has_errors())
 
@@ -102,7 +102,7 @@ def handle_change_state(req: ChangeStateRequest):
             print('Requested state successfully resolved!\n')    
         else:
             print('Requested state NOT successfully resolved!\n')
-            
+
     return ChangeStateResponse(requested_state_resolved)
 
 
