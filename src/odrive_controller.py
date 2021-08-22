@@ -86,7 +86,7 @@ def handle_change_state(req: ChangeStateRequest):
     
     # resolve the request to change the state in another thread so we can set a timeout for it
     requested_state_resolved = False
-    thread = threading.Thread(target=resolve_requested_state(req))
+    thread = threading.Thread(target=resolve_requested_state, args=(req, ))
     thread.start()
     thread.join(timeout=10)
 
