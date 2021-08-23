@@ -177,12 +177,12 @@ if __name__ == '__main__':
         print("ODrive detected, launching odrive_interface node...\n")    
         if (calibration_routine()):
             setup_node()
-        shutdown_token.set()
     except TimeoutError:
         print("Could not find an ODrive.")    
     
     finally:
-        release_motors()
+        release_motors()   
+        shutdown_token.set() 
         sys.exit()    
     
     
