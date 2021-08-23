@@ -91,7 +91,7 @@ def handle_change_state(req: ChangeStateRequest):
     requested_state_resolved = False
     thread = threading.Thread(target=resolve_requested_state, args=(req, ))
     thread.start()
-    thread.join(timeout=20)
+    thread.join(timeout=60)
 
     # check if thread timed out or not
     if (thread.isAlive()):
