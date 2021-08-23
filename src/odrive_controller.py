@@ -14,6 +14,7 @@ from fibre import Event
 # Global variables used throughout the program
 requested_state_resolved = False
 shutdown_token = Event()
+my_drive = None
 
 def has_errors():
     global my_drive
