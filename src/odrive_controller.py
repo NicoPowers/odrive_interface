@@ -132,10 +132,12 @@ if __name__ == '__main__':
         my_drive = odrive.find_any(timeout=5, channel_termination_token=shutdown_token)
         print("ODrive detected, launching odrive_interface node...\n")    
         setup_node()
-        shutdown_token.set()
+        # shutdown_token.set()
     except TimeoutError:
         print("Could not find an ODrive.")    
-        sys.exit()
+    
+    finally:
+        sys.exit()    
     
     
     
