@@ -133,11 +133,13 @@ def calibration_routine():
     req.isCalibration = True
     print("Attempting to calibrate motor 0")
     res = handle_change_state(req)
+    print("Finished calibratiing motor 0")
     if (res.success):
         req.axis = 1
         req.requestedState = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
         print("Attempting to calibrate motor 1")
         res = handle_change_state(req)
+        print("Finished calibratiing motor 0")
         if (not res.success):
             return False
     else:
