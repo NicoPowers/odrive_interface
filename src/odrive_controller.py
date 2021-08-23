@@ -123,6 +123,45 @@ def setup_node():
     print("odrive_interface node launched, ready to receive commands...\n")
     rospy.spin()
 
+def calibration_routine():
+    global my_drive
+    # start full motor calibration sequence
+    req = ChangeStateRequest()
+    req.axis = 0
+    req.requestedState = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
+    req.isCalibration = True
+    res = handle_change_state(req)
+    if (res.success):
+        req.axis = 1
+        req.requestedState = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
+        res = handle_change_state(req)
+        if (not res.success):
+            return False
+    else:
+        return False
+
+    return True
+
+def release_motors():
+    global my_drive
+    # start full motor calibration sequence
+    req = ChangeStateRequest()
+    req.axis = 0
+    req.requestedState = AXIS_STATE_IDLE
+    req.isCalibration = False
+    res = handle_change_state(req)
+    if (res.success):
+        req.axis = 1
+        req.requestedState = AXIS_STATE_IDLE
+        res = handle_change_state(req)
+        if (not res.success):
+            return False
+    else:
+        return False
+
+    return True
+
+
 
         
 if __name__ == '__main__':    
@@ -131,12 +170,14 @@ if __name__ == '__main__':
         print("Trying to find an ODrive...\n")
         my_drive = odrive.find_any(timeout=5, channel_termination_token=shutdown_token)
         print("ODrive detected, launching odrive_interface node...\n")    
-        setup_node()
+        if (calibration_routine()):
+            setup_node()
         shutdown_token.set()
     except TimeoutError:
         print("Could not find an ODrive.")    
     
     finally:
+        release_motors()
         sys.exit()    
     
     
