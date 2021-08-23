@@ -48,6 +48,7 @@ def handle_change_control_mode(req: ChangeControlModeRequest):
 def resolve_requested_state(req: ChangeStateRequest):
     global my_drive, requested_state_resolved    
 
+    print(req)
     print("Attempting to change the current state to the requested state...\n")
     time.sleep(1)
     
@@ -86,7 +87,6 @@ def handle_change_state(req: ChangeStateRequest):
         return ChangeStateResponse(False)
     
     global my_drive, requested_state_resolved
-    print(my_drive)
     # resolve the request to change the state in another thread so we can set a timeout for it
     requested_state_resolved = False
     thread = threading.Thread(target=resolve_requested_state, args=(req, ))
