@@ -126,14 +126,17 @@ def setup_node():
 def calibration_routine():
     global my_drive
     # start full motor calibration sequence
+    
     req = ChangeStateRequest()
     req.axis = 0
     req.requestedState = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
     req.isCalibration = True
+    print("Attempting to calibrate motor 0")
     res = handle_change_state(req)
     if (res.success):
         req.axis = 1
         req.requestedState = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
+        print("Attempting to calibrate motor 1")
         res = handle_change_state(req)
         if (not res.success):
             return False
