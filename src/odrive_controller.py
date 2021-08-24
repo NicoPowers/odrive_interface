@@ -130,7 +130,22 @@ def setup_node():
     rospy.spin()
 
 def engage_motors():
-    # start full motor calibration sequence
+    print("Trying to engage motors...\n")
+    # try to place motors in closed loop control mode
+    req = ChangeStateRequest()
+    req.axis = 0
+    req.requestedState = AXIS_STATE_CLOSED_LOOP_CONTROL
+    req.isCalibration = False
+    res = handle_change_state(req)
+    if (res.success):
+        req.axis = 1
+        res = handle_change_state(req)
+        if (not res.success):
+            return False
+    else:
+        return False
+
+    # try to place motors in velocity contorl mode
     req = ChangeControlModeRequest()
     req.axis = 0
     req.requestedControlMode = CONTROL_MODE_VELOCITY_CONTROL
@@ -147,30 +162,29 @@ def engage_motors():
     my_drive.axis0.controller.input_vel = 0
     my_drive.axis1.controller.input_vel = 0
 
-    print("Motors are ready to start moving!")
+    print("Motors are engaged!")
     return True
 
 def calibration_routine():
     # start full motor calibration sequence
+    print("Beginning calibration sequence...\n")
     req = ChangeStateRequest()
     req.axis = 0
     req.requestedState = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
     req.isCalibration = True
-    print("Attempting to calibrate motor 0")
     res = handle_change_state(req)
-    print("Finished calibratiing motor 0")
     if (res.success):
         req.axis = 1
         req.requestedState = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
-        print("Attempting to calibrate motor 1")
         res = handle_change_state(req)
-        print("Finished calibratiing motor 0")
         if (not res.success):
             return False
     else:
         return False
 
+    print("Calibration sequence complete!\n")
     return True
+
 
 def release_motors():
     global my_drive
@@ -201,8 +215,8 @@ if __name__ == '__main__':
         my_drive = odrive.find_any(timeout=5, channel_termination_token=shutdown_token)
         print("ODrive detected, launching odrive_interface node...\n")    
         if (calibration_routine()):
-            engage_motors()
-            setup_node()
+            if (engage_motors()):
+                setup_node()
     except TimeoutError:
         print("Could not find an ODrive.")    
     finally:
