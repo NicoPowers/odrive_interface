@@ -118,8 +118,15 @@ def velocity_callback(data: VelocityControl):
     # TODO: Have ODrive try to set velocities for each axis
     
     global my_drive
-    my_drive.axis0.controller.input_vel = -data.axis0_velocity
-    my_drive.axis1.controller.input_vel = data.axis1_velocity
+
+    # check to see if errors exist
+    if (has_errors()):
+        print("Could not drive motors, errors exist: ")
+        dump_errors(my_drive)
+        release_motors()
+    else:
+        my_drive.axis0.controller.input_vel = -data.axis0_velocity
+        my_drive.axis1.controller.input_vel = data.axis1_velocity
 
 def setup_node():    
     rospy.init_node('odrive_interface')
