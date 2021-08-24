@@ -9,6 +9,7 @@ import time
 import rospy
 import odrive
 from odrive.enums import *
+from odrive.utils import *
 from fibre import Event
 
 # Global variables used throughout the program
@@ -18,15 +19,19 @@ my_drive = None
 
 def has_errors():
     global my_drive
-
+    has_errors = False
+    
     if (my_drive.axis0.error > 0):
-        print("Error with axis 0")
-        return True
-    elif (my_drive.axis1.error > 0):
-        print("Error with axis 1")
-        return True
+        print("Error with axis 0\n ")
+        has_errors = True
+    if (my_drive.axis1.error > 0):
+        print("Error with axis 1\n")
+        has_errors = True
 
-    return False
+    if has_errors:
+        dump_errors(my_drive)
+        
+    return has_errors
 
 def handle_change_control_mode(req: ChangeControlModeRequest):
     # error handling
@@ -197,7 +202,6 @@ if __name__ == '__main__':
             setup_node()
     except TimeoutError:
         print("Could not find an ODrive.")    
-    
     finally:
         release_motors()   
         shutdown_token.set() 
