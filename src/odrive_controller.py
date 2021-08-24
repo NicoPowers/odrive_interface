@@ -146,6 +146,8 @@ def engage_motors():
     # ensure motors don't start running
     my_drive.axis0.controller.input_vel = 0
     my_drive.axis1.controller.input_vel = 0
+
+    print("Motors are ready to start moving!")
     return True
 
 def calibration_routine():
