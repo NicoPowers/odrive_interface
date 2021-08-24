@@ -152,7 +152,7 @@ def engage_motors():
     res = handle_change_control_mode(req)
     if (res.success):
         req.axis = 1
-        res = handle_change_state(req)
+        res = handle_change_control_mode(req)
         if (not res.success):
             return False
     else:
