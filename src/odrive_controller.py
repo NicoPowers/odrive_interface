@@ -41,7 +41,7 @@ def handle_change_control_mode(req: ChangeControlModeRequest):
     else:
         my_drive.axis1.controller.config.control_mode = req.requestedControlMode
 
-    time.sleep(1.0)    
+    time.sleep(0.25)    
     
     return ChangeControlModeResponse(not has_errors())
 
@@ -124,9 +124,27 @@ def setup_node():
     print("odrive_interface node launched, ready to receive commands...\n")
     rospy.spin()
 
+def engage_motors():
+    # start full motor calibration sequence
+    req = ChangeControlModeRequest()
+    req.axis = 0
+    req.requestedControlMode = CONTROL_MODE_VELOCITY_CONTROL
+    res = handle_change_control_mode(req)
+    if (res.success):
+        req.axis = 1
+        res = handle_change_state(req)
+        if (not res.success):
+            return False
+    else:
+        return False
+
+    # ensure motors don't start running
+    my_drive.axis0.controller.input_vel = 0
+    my_drive.axis1.controller.input_vel = 0
+    return True
+
 def calibration_routine():
     # start full motor calibration sequence
-    
     req = ChangeStateRequest()
     req.axis = 0
     req.requestedState = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
