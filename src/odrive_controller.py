@@ -118,7 +118,7 @@ def velocity_callback(data: VelocityControl):
     # TODO: Have ODrive try to set velocities for each axis
     
     global my_drive
-    my_drive.axis0.controller.input_vel = data.axis0_velocity
+    my_drive.axis0.controller.input_vel = -data.axis0_velocity
     my_drive.axis1.controller.input_vel = data.axis1_velocity
 
 def setup_node():    

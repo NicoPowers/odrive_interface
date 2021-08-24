@@ -195,8 +195,12 @@ if __name__ == '__main__':
         print("Trying to find an ODrive...\n")
         my_drive = odrive.find_any(timeout=5, channel_termination_token=shutdown_token)
         print("ODrive detected, launching odrive_interface node...\n")    
-        calibration_routine()
+        # calibration_routine()
         engage_motors()
+        my_drive.axis0.controller.input_vel = -2.0
+        time.sleep(5)
+        my_drive.axis1.controller.input_vel = 2.0
+        time.sleep(30)
     except TimeoutError:
         print("Could not find an ODrive.")    
     finally:
