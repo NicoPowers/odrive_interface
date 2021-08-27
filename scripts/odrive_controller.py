@@ -43,7 +43,6 @@ if __name__ == '__main__':
         if (my_drive.calibrate()):
             if (my_drive.engage_motors()):
                 setup_node()       
-  
     finally:
         my_drive.shutdown()
             

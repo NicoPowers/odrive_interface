@@ -21,6 +21,12 @@ class ODrive:
             print("STATUS: Trying to find an ODrive...\n")
             self.__connected_odrive = odrive.find_any(timeout=5, channel_termination_token=self.__shutdown_token)
             print("STATUS: ODrive detected, launching odrive_interface node...\n")
+            
+            if (self.__has_errors()):
+                print("ERROR: ODrive module has errors, trying rebooting it to flush errors.\n")
+                dump_errors(self.__connected_odrive)
+                raise ValueError("ODrive has errors")
+            
             self.__watchdog_timeout = watchdog_timeout
         except TimeoutError:
             print("ERROR: Could not find an ODrive.\n")
