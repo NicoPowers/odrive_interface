@@ -1,29 +1,200 @@
+from re import T
 import odrive
 from odrive.utils import *
 from odrive.enums import *
+import threading
+from time import sleep
 from fibre import Event
 
+
 class ODrive:
+    __connected_odrive = None
+    __watchdog_timeout = 5
+    __shutdown_token = Event()
+    __watchdog_enabled = False
+    __is_calibrated = False
+    __is_engaged = False    
 
-    connected_odrive = None
-    axis0_enabled = False
-    axis1_enabled = False
-    control_mode = AXIS_STATE_IDLE
+    def __init__(self, watchdog_timeout=5):
+        self.__connected_odrive = odrive.find_any(timeout=5, channel_termination_token=self.__shutdown_token)
+        self.__watchdog_timeout = watchdog_timeout        
 
-    def __init__(self, connected_odrive):
-        self.connected_odrive = connected_odrive
 
-    def start_watchdog(self, timeout):
-        # enable watchdog timer for each motor
-        connected_odrive.axis0.config.enable_watchdog = True
-        connected_odrive.axis1.config.enable_watchdog = True
+    def __has_errors(self):
+
+        if (self.__connected_odrive.axis0.error > 0 or self.__connected_odrive.axis1.error > 0 ):
+            self.__is_engaged = False        
+            return True
+        
+        return False
+
+    def __start_watchdog(self):
 
         # set watchdog timer timeout
-        connected_odrive.axis0.config.watchdog_timeout = timeout
-        connected_odrive.axis1.config.watchdog_timeout = timeout
+        self.__connected_odrive.axis0.config.watchdog_timeout = self.__watchdog_timeout
+        self.__connected_odrive.axis1.config.watchdog_timeout = self.__watchdog_timeout
 
-    def stop_watchdog(connected_odrive):
+        # enable watchdog timer for each motor
+        self.__connected_odrive.axis0.config.enable_watchdog = True
+        self.__connected_odrive.axis1.config.enable_watchdog = True
 
-        # disable watchdog timer for each motor
-        connected_odrive.axis0.config.enable_watchdog = False
-        connected_odrive.axis1.config.enable_watchdog = False
+        self.__watchdog_enabled = True
+
+        if (self.__has_errors()):
+            print("ERROR: Failed to initialize Watchdog Timer.\n")
+            dump_errors(self.__connected_odrive)
+            return False
+        
+        return True
+
+    def __stop_watchdog(self):
+
+        # disable the watchdog timer for each motor
+        self.__connected_odrive.axis0.config.enable_watchdog = False
+        self.__connected_odrive.axis1.config.enable_watchdog = False
+
+    def __wait_for_calibration(self):
+        while (self.__connected_odrive.axis0.current_state != AXIS_STATE_IDLE) or (self.__connected_odrive.axis1.current_state != AXIS_STATE_IDLE):
+                time.sleep(0.1)
+
+    def __change_control_mode(self, axis, requested_control_mode):
+        
+        if (axis == 0):
+            self.__connected_odrive.axis0.controller.config.control_mode = requested_control_mode
+        elif (axis == 1):
+            self.__connected_odrive.axis1.controller.config.control_mode = requested_control_mode
+        else:
+            print("ERROR: Incorrect axis specified: {}\n".format(axis))
+            return False
+
+        # small delay to allow changes take place, but it may not be needed
+        sleep(0.25)
+
+        if (axis == 0):
+            if (self.__connected_odrive.axis0.controller.config.control_mode != requested_control_mode):
+                print("ERROR: Requested control mode change for axis 0 could not resolve. \n")
+                dump_errors(self.__connected_odrive)
+                return False
+        else:
+            if (self.__connected_odrive.axis1.controller.config.control_mode != requested_control_mode):
+                print("ERROR: Requested control mode change for axis 1 could not resolve. \n")
+                dump_errors(self.__connected_odrive)
+                return False
+        
+        return True
+
+
+    def __change_state(self, axis, requested_state):
+        
+        if (axis == 0):
+            self.__connected_odrive.axis0.requested_state = requested_state
+        elif (axis == 1):
+            self.__connected_odrive.axis1.requested_state = requested_state
+        else:
+            print("ERROR: Incorrect axis specified: {}\n".format(axis))
+            return False
+
+        # small delay to allow changes take place, but it may not be needed
+        sleep(0.25)
+
+        if (axis == 0):
+            if (self.__connected_odrive.axis0.curent_state != requested_state):
+                print("ERROR: Requested state change for axis 0 could not resolve. \n")
+                dump_errors(self.__connected_odrive)
+                return False
+        else:
+            if (self.__connected_odrive.axis1.curent_state != requested_state):
+                print("ERROR: Requested state change for axis 1 could not resolve. \n")
+                dump_errors(self.__connected_odrive)
+                return False
+        
+        return True
+
+    def shutdown(self):
+        # stop robot if moving
+        self.disengage_motors()
+
+        # disable watchdog timer
+        self.__stop_watchdog()
+
+        # release USB control from ODrive
+        self.__shutdown_token.set()
+
+    def set_velocity(self, axis, velocity):
+        if (self.__has_errors()):
+            print("ERROR: Errors exist on motors or encoders.\n")
+            dump_errors(self.__connected_odrive)
+            return False
+
+        if (self.__is_engaged):
+            if (axis == 0):
+                self.__connected_odrive.axis0.controller.input_vel = velocity
+            elif (axis == 1):
+                self.__connected_odrive.axis1.controller.input_vel = velocity
+            else:
+                print("ERROR: Incorrect axis specified: {}\n".format(axis))
+                return False
+            
+            if (not self.__watchdog_enabled):
+                self.__start_watchdog()
+            
+            return True                
+        
+        else:
+            print("ERROR: Motors have not been engaged yet.\n")
+            return False
+
+
+    def calibrate(self):
+        # start full motor calibration sequence
+        print("STATUS: Beginning full calibration sequence...\n")
+        
+        self.__connected_odrive.axis0.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
+        self.__connected_odrive.axis1.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
+        # calibrated can take a while, so wait around 60 seconds max for both motors to be fully calibrated
+        # each axis will return to idle state after calibration
+        calibration_thread = threading.Thread(target=self.__wait_for_calibration)
+        calibration_thread.start()
+        calibration_thread.join(timeout=60)
+
+        # check if thread timed out or not
+        if (calibration_thread.isAlive()):
+            print("ERROR: Calibration could not resolve in time.\n")
+            dump_errors(self.__connected_odrive)
+            return False
+        
+        self.__is_calibrated = True
+        return True
+        
+
+    def engage_motors(self):
+        
+        # make sure robot doesn't start running away as soon as we engage them
+        self.__connected_odrive.axis0.controller.input_vel = 0
+        self.__connected_odrive.axis1.controller.input_vel = 0
+
+        print("STATUS: Trying to engage motors...\n")
+
+        # try to change state to closed loop control mode
+        if (self.__is_calibrated):
+            if (self.__change_state(0, AXIS_STATE_CLOSED_LOOP_CONTROL) and self.__change_state(1, AXIS_STATE_CLOSED_LOOP_CONTROL)):
+                if (self.__change_control_mode(0, CONTROL_MODE_VELOCITY_CONTROL) and self.__change_control_mode(1, CONTROL_MODE_VELOCITY_CONTROL)):
+                    print("STATUS: Motors are engaged.\n")
+                    self.__is_engaged = True
+                    return True
+        else:
+            print("ERROR: Motors have not been calibrated yet.\n")
+
+        print("ERROR: Motors failed to engage.\n")
+        dump_errors(self.__connected_odrive)
+        return False
+
+    def disengage_motors(self):
+
+        self.__change_state(0, AXIS_STATE_IDLE)
+        self.__change_state(1, AXIS_STATE_IDLE)
+        self.__is_engaged = False
+        
+
+
+        
