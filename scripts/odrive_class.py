@@ -35,9 +35,9 @@ class ODrive:
             
 
             # set watchdog timer timeout
-            self.__watchdog_timeout = watchdog_timeout
-            self.__connected_odrive.axis0.config.watchdog_timeout = self.__watchdog_timeout
-            self.__connected_odrive.axis1.config.watchdog_timeout = self.__watchdog_timeout
+            # self.__watchdog_timeout = watchdog_timeout
+            # self.__connected_odrive.axis0.config.watchdog_timeout = self.__watchdog_timeout
+            # self.__connected_odrive.axis1.config.watchdog_timeout = self.__watchdog_timeout
 
             self.is_connected = True
 
@@ -145,31 +145,34 @@ class ODrive:
 
     def set_velocity(self, axis, velocity):
         if (self.__is_engaged):
-            if (not self.__watchdog_enabled):
-                self.__connected_odrive.axis0.config.enable_watchdog = True
-                self.__connected_odrive.axis1.config.enable_watchdog = True
-                self.__watchdog_enabled = True
+            # if (not self.__watchdog_enabled):
+            #     self.__connected_odrive.axis0.config.enable_watchdog = True
+            #     self.__connected_odrive.axis1.config.enable_watchdog = True
+            #     self.__watchdog_enabled = True
 
             if (axis == 0):
-                if(self.__connected_odrive.axis0.error == AXIS_ERROR_WATCHDOG_TIMER_EXPIRED):
-                    response = input("ERROR: Watchdog Timer on axis 0 expired, cannot move axis 0.\n Do you want to reset the Watchdog Timer on axis 0? (Y/N): ")                    
-                    if(self.__handle_response(0, response)):
-                        self.__connected_odrive.axis0.controller.input_vel = velocity
-                        self.__connected_odrive.axis0.watchdog_feed()
-                else:    
-                    self.__connected_odrive.axis0.controller.input_vel = velocity
-                    self.__connected_odrive.axis0.watchdog_feed()
+                # if(self.__connected_odrive.axis0.error == AXIS_ERROR_WATCHDOG_TIMER_EXPIRED):
+                #     response = input("ERROR: Watchdog Timer on axis 0 expired, cannot move axis 0.\n Do you want to reset the Watchdog Timer on axis 0? (Y/N): ")                    
+                #     if(self.__handle_response(0, response)):
+                #         self.__connected_odrive.axis0.controller.input_vel = velocity
+                #         self.__connected_odrive.axis0.watchdog_feed()
+                # else:    
+                #     self.__connected_odrive.axis0.controller.input_vel = velocity
+                #     self.__connected_odrive.axis0.watchdog_feed()
+
+                self.__connected_odrive.axis0.controller.input_vel = velocity
 
             elif (axis == 1):
-                if(self.__connected_odrive.axis1.error == AXIS_ERROR_WATCHDOG_TIMER_EXPIRED):
-                    response = input("ERROR: Watchdog Timer on axis 1 expired, cannot move axis 1.\n Do you want to reset the Watchdog Timer on axis 1? (Y/N): ")                    
-                    if(self.__handle_response(1, response)):
-                        self.__connected_odrive.axis1.controller.input_vel = velocity
-                        self.__connected_odrive.axis1.watchdog_feed()
-                else:    
-                    self.__connected_odrive.axis1.controller.input_vel = velocity
-                    self.__connected_odrive.axis1.watchdog_feed()
+                # if(self.__connected_odrive.axis1.error == AXIS_ERROR_WATCHDOG_TIMER_EXPIRED):
+                #     response = input("ERROR: Watchdog Timer on axis 1 expired, cannot move axis 1.\n Do you want to reset the Watchdog Timer on axis 1? (Y/N): ")                    
+                #     if(self.__handle_response(1, response)):
+                #         self.__connected_odrive.axis1.controller.input_vel = velocity
+                #         self.__connected_odrive.axis1.watchdog_feed()
+                # else:    
+                #     self.__connected_odrive.axis1.controller.input_vel = velocity
+                #     self.__connected_odrive.axis1.watchdog_feed()
                                     
+                self.__connected_odrive.axis1.controller.input_vel = velocity
             else:
                 print("ERROR: Incorrect axis specified: {}\n".format(axis))
                 return False

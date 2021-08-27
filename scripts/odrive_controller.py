@@ -15,22 +15,35 @@ from fibre import Event
 
 
 my_drive = None
+last = None
+ignore = False
 
 
 def velocity_callback(data: VelocityControl):
     print("STATUS: Received velocity for axis 0: {}".format(data.axis0_velocity))
     print("STATUS: Received velocity for axis 1: {}".format(data.axis1_velocity))    
     
-    global my_drive
+    global my_drive, last, ignore
     
-    my_drive.set_velocity(0, -data.axis0_velocity)
-    my_drive.set_velocity(1, data.axis1_velocity)
+    last = rospy.get_rostime()
+
+    if (not ignore):
+        my_drive.set_velocity(0, -data.axis0_velocity)
+        my_drive.set_velocity(1, data.axis1_velocity)
 
 def setup_node():    
     rospy.init_node('odrive_interface')
     rospy.Subscriber("odrive_cmd_vel", VelocityControl, velocity_callback, queue_size=1)
     print("odrive_interface node launched, ready to receive commands...\n")
-    rospy.spin()
+    r = rospy.Rate(1)
+
+    while(True):
+        # check to see the last time a cmd_vel was received
+        now = rospy.get_rostime()
+        if (now - last) > 5:
+            global ignore
+            ignore = True
+        r.sleep()
 
 
 if __name__ == '__main__':    
