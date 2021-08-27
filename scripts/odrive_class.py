@@ -28,13 +28,14 @@ class ODrive:
             if (self.__has_errors()):
                 print("STATUS: ODrive module has errors, going to clear errors...\n")
                 dump_errors(self.__connected_odrive)
-                self.__connected_odrive.clear_errors()
+                self.__clear_errors()
                 if (self.__has_errors()):
                     print("ERROR: Clearing errors did not working, rebooting Odrive...")
                     self.__connected_odrive.reboot()
             
 
             # set watchdog timer timeout
+            self.__watchdog_timeout = watchdog_timeout
             self.__connected_odrive.axis0.config.watchdog_timeout = self.__watchdog_timeout
             self.__connected_odrive.axis1.config.watchdog_timeout = self.__watchdog_timeout
 
@@ -51,6 +52,11 @@ class ODrive:
             return True
         
         return False
+
+    def __clear_errors(self):
+        self.__connected_odrive.axis0.error = 0
+        self.__connected_odrive.axis1.error = 0
+        self.__connected_odrive.error = 0
 
 
     def __wait_for_calibration(self):
@@ -124,7 +130,7 @@ class ODrive:
                 self.__connected_odrive.axis1.config.enable_watchdog = False
                 self.__connected_odrive.axis1.error = 0
             
-            self.clear_errors()
+            self.__clear_errors()
             self.__watchdog_enabled = False
         
 
