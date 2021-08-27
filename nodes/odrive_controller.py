@@ -35,19 +35,19 @@ def setup_node():
 
 if __name__ == '__main__':    
     try:
-        # try to find ODrive, if no ODrive can be found within 5 seconds, terminate program/node and notify user
-        print("STATUS: Trying to find an ODrive...\n")
+        
         my_drive = ODrive(timeout=5)
-        print("STATUS: ODrive detected, launching odrive_interface node...\n")    
+
+        if (my_drive == None):
+            sys.exit()
+        
         if (ODrive.calibrate()):
             if (ODrive.engage_motors()):
                 setup_node()       
-
-    except TimeoutError:
-        print("ERROR: Could not find an ODrive.\n")    
+  
     finally:
         ODrive.shutdown()
-        sys.exit()    
+            
     
     
     

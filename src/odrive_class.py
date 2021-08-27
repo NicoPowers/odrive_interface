@@ -16,8 +16,15 @@ class ODrive:
     __is_engaged = False    
 
     def __init__(self, watchdog_timeout=5):
-        self.__connected_odrive = odrive.find_any(timeout=5, channel_termination_token=self.__shutdown_token)
-        self.__watchdog_timeout = watchdog_timeout        
+        try:
+            # try to find ODrive, if no ODrive can be found within 5 seconds, notify user
+            print("STATUS: Trying to find an ODrive...\n")
+            self.__connected_odrive = odrive.find_any(timeout=5, channel_termination_token=self.__shutdown_token)
+            print("STATUS: ODrive detected, launching odrive_interface node...\n")
+            self.__watchdog_timeout = watchdog_timeout
+        except TimeoutError:
+            print("ERROR: Could not find an ODrive.\n")
+            self = None                        
 
 
     def __has_errors(self):
