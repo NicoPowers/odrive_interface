@@ -42,8 +42,7 @@ class ODrive:
 
     def __has_errors(self):
 
-        if (self.__connected_odrive.axis0.error > 0 or self.__connected_odrive.axis1.error > 0 ):
-            self.__is_engaged = False        
+        if (self.__connected_odrive.axis0.error > 0 or self.__connected_odrive.axis1.error > 0 ):        
             return True
         
         return False
@@ -140,11 +139,7 @@ class ODrive:
         self.__shutdown_token.set()
 
     def set_velocity(self, axis, velocity):
-        
-
         if (self.__is_engaged):
-            if (not self.__watchdog_enabled):
-                self.__start_watchdog()
 
             if (axis == 0):
                 if (not self.__connected_odrive.axis0.config.enable_watchdog):

@@ -22,6 +22,7 @@ def velocity_callback(data: VelocityControl):
     print("STATUS: Received velocity for axis 1: {}".format(data.axis1_velocity))    
     
     global my_drive
+    
     my_drive.set_velocity(0, -data.axis0_velocity)
     my_drive.set_velocity(1, data.axis1_velocity)
 
