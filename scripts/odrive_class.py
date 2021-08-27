@@ -140,7 +140,8 @@ class ODrive:
 
     def set_velocity(self, axis, velocity):
         if (self.__is_engaged):
-
+            self.__connected_odrive.clear_errors()
+            
             if (axis == 0):
                 if (not self.__connected_odrive.axis0.config.enable_watchdog):
                     self.__connected_odrive.axis0.config.enable_watchdog = True
