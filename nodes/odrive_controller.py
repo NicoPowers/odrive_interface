@@ -3,7 +3,7 @@ from __future__ import print_function
 
 from odrive_interface.msg import VelocityControl
 from odrive_interface.srv import *
-from odrive_class import ODrive
+
 import sys
 import threading
 import time
@@ -14,6 +14,7 @@ from odrive.enums import *
 from odrive.utils import *
 from fibre import Event
 
+from odrive_class import ODrive
 
 my_drive = None
 
