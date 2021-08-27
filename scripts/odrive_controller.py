@@ -35,7 +35,7 @@ def setup_node():
 if __name__ == '__main__':    
     try:
         
-        my_drive = ODrive(timeout=5)
+        my_drive = ODrive(watchdog_timeout=5)
 
         if (my_drive == None):
             sys.exit()
