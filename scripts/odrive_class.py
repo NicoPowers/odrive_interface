@@ -109,11 +109,19 @@ class ODrive:
         return True
 
     def __handle_response(self, axis, response):
-        if (response == 'Y'):
+        if (response != 'Y' or response != 'N'):
+            print("ERROR: Incorrect option: {}".format(response))
+
+        elif (response == 'Y'):
+            print("STATUS: Resetting Watchdog Timer on axis {}".format(axis))
             if (axis == 0):
                 self.__connected_odrive.axis0.error = 0
+                self.__connected_odrive.axis0.config.enable_watchdog = False                
             else:
                 self.__connected_odrive.axis1.error = 0
+                self.__connected_odrive.axis1.config.enable_watchdog = False
+            self.__watchdog_enabled = False
+        
 
     def shutdown(self):
         # stop robot if moving
@@ -131,14 +139,14 @@ class ODrive:
 
             if (axis == 0):
                 if(self.__connected_odrive.axis0.error == AXIS_ERROR_WATCHDOG_TIMER_EXPIRED):
-                    response = input("ERROR: Watchdog Timer on axis 0 expired, cannot move axis 0.\n Do you want to reset the Watchdog Timer on axis 0? (Y/N)")                    
+                    response = input("ERROR: Watchdog Timer on axis 0 expired, cannot move axis 0.\n Do you want to reset the Watchdog Timer on axis 0? (Y/N): ")                    
                     self.__handle_response(0, response)
                 else:    
                     self.__connected_odrive.axis0.controller.input_vel = velocity
 
             elif (axis == 1):
                 if(self.__connected_odrive.axis1.error == AXIS_ERROR_WATCHDOG_TIMER_EXPIRED):
-                    response = input("ERROR: Watchdog Timer on axis 1 expired, cannot move axis 1.\n Do you want to reset the Watchdog Timer on axis 1? (Y/N)")                    
+                    response = input("ERROR: Watchdog Timer on axis 1 expired, cannot move axis 1.\n Do you want to reset the Watchdog Timer on axis 1? (Y/N): ")                    
                     self.__handle_response(1, response)
                 else:    
                     self.__connected_odrive.axis1.controller.input_vel = velocity
