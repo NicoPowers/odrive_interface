@@ -140,10 +140,7 @@ class ODrive:
         self.__shutdown_token.set()
 
     def set_velocity(self, axis, velocity):
-        if (self.__has_errors()):
-            print("ERROR: Errors exist on motors or encoders.\n")
-            dump_errors(self.__connected_odrive)
-            return False
+        
 
         if (self.__is_engaged):
             if (not self.__watchdog_enabled):
@@ -161,6 +158,10 @@ class ODrive:
                 print("ERROR: Incorrect axis specified: {}\n".format(axis))
                 return False
             
+            if (self.__has_errors()):
+                print("ERROR: Errors setting velocity on axis {}.\n".format(axis))
+                dump_errors(self.__connected_odrive)
+                return False
             
             return True                
         
