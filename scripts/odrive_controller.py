@@ -44,7 +44,8 @@ if __name__ == '__main__':
             if (my_drive.engage_motors()):
                 setup_node()       
     finally:
-        my_drive.shutdown()
+        if (my_drive != None):
+            my_drive.shutdown()
             
     
     
