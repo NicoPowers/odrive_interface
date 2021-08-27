@@ -37,14 +37,14 @@ if __name__ == '__main__':
         
         my_drive = ODrive(watchdog_timeout=5)
 
-        if (my_drive == None):
+        if (not my_drive.is_connected):
             sys.exit()
         
         if (my_drive.calibrate()):
             if (my_drive.engage_motors()):
                 setup_node()       
     finally:
-        if (my_drive != None):
+        if (not my_drive.is_connected):
             my_drive.shutdown()
             
     

@@ -9,6 +9,7 @@ from fibre import Event
 
 
 class ODrive:
+    is_connected = False
     __connected_odrive = None
     __watchdog_timeout = 5
     __shutdown_token = Event()
@@ -25,13 +26,15 @@ class ODrive:
             if (self.__has_errors()):
                 print("ERROR: ODrive module has errors, trying rebooting it to flush errors.\n")
                 dump_errors(self.__connected_odrive)
-                self = None
+                self.is_connected = False
             
             else:
+                self.is_connected = True
                 self.__watchdog_timeout = watchdog_timeout
+
         except TimeoutError:
             print("ERROR: Could not find an ODrive.\n")
-            self = None                        
+            self.is_connected = False                        
 
 
     def __has_errors(self):
