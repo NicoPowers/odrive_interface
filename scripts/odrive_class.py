@@ -12,7 +12,6 @@ class ODrive:
     __connected_odrive = None
     __watchdog_timeout = 5
     __shutdown_token = Event()
-    __watchdog_enabled = False
     __is_calibrated = False
     __is_engaged = False    
 
@@ -45,8 +44,6 @@ class ODrive:
         # enable watchdog timer for each motor
         self.__connected_odrive.axis0.config.enable_watchdog = True
         self.__connected_odrive.axis1.config.enable_watchdog = True
-
-        self.__watchdog_enabled = True
 
         if (self.__has_errors()):
             print("ERROR: Failed to initialize Watchdog Timer.\n")
@@ -136,15 +133,17 @@ class ODrive:
 
         if (self.__is_engaged):
             if (axis == 0):
+                if (not self.__connected_odrive.axis0.config.enable_watchdog):
+                    self.__connected_odrive.axis0.config.enable_watchdog = True
                 self.__connected_odrive.axis0.controller.input_vel = velocity
             elif (axis == 1):
+                if (not self.__connected_odrive.axis1.config.enable_watchdog):
+                    self.__connected_odrive.axis1.config.enable_watchdog = True
                 self.__connected_odrive.axis1.controller.input_vel = velocity
             else:
                 print("ERROR: Incorrect axis specified: {}\n".format(axis))
                 return False
             
-            if (not self.__watchdog_enabled):
-                self.__start_watchdog()
             
             return True                
         
