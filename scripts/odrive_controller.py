@@ -40,12 +40,12 @@ if __name__ == '__main__':
         if (my_drive == None):
             sys.exit()
         
-        if (ODrive.calibrate()):
-            if (ODrive.engage_motors()):
+        if (my_drive.calibrate()):
+            if (my_drive.engage_motors()):
                 setup_node()       
   
     finally:
-        ODrive.shutdown()
+        my_drive.shutdown()
             
     
     
