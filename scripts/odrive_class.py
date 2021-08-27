@@ -28,8 +28,10 @@ class ODrive:
             if (self.__has_errors()):
                 print("STATUS: ODrive module has errors, going to clear errors...\n")
                 dump_errors(self.__connected_odrive)
-                self.__connected_odrive.axis0.error = 0
-                self.__connected_odrive.axis1.error = 0
+                self.__connected_odrive.clear_errors()
+                if (self.__has_errors()):
+                    print("ERROR: Clearing errors did not working, rebooting Odrive...")
+                    self.__connected_odrive.reboot()
             
 
             # set watchdog timer timeout
