@@ -120,21 +120,26 @@ class ODrive:
         return True
 
     def __handle_response(self, axis, response):
-        if (response != 'Y' or response != 'N'):
-            print("ERROR: Incorrect option: {}".format(response))
-
-        elif (response == 'Y'):
+                
+        if (response == 'Y'):
             print("STATUS: Resetting Watchdog Timer on axis {}".format(axis))
             if (axis == 0):
-                self.__connected_odrive.axis0.config.enable_watchdog = False
-                self.__connected_odrive.axis0.error = 0
+                self.__connected_odrive.axis0.config.enable_watchdog = False                
                                 
             else:
-                self.__connected_odrive.axis1.config.enable_watchdog = False
-                self.__connected_odrive.axis1.error = 0
+                self.__connected_odrive.axis1.config.enable_watchdog = False                
             
             self.__clear_errors()
             self.__watchdog_enabled = False
+            return True
+
+        elif (response == 'N'):
+            print("STATUS: You chose to not re-enable the Watchdog Timer.\n")
+            return True
+        
+        else:
+            print("ERROR: Incorrect option: {}".format(response))
+            return False
         
 
     def shutdown(self):
