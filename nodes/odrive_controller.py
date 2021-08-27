@@ -3,7 +3,7 @@ from __future__ import print_function
 
 from odrive_interface.msg import VelocityControl
 from odrive_interface.srv import *
-from odrive_class import ODrive
+from odrive_interface.src.odrive_class import ODrive
 import sys
 import threading
 import time
