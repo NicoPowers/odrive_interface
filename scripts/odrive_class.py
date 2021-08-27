@@ -10,8 +10,10 @@ from fibre import Event
 
 class ODrive:
     is_connected = False
+
     __connected_odrive = None
     __watchdog_timeout = 5
+    __watchdog_enabled = False
     __shutdown_token = Event()
     __is_calibrated = False
     __is_engaged = False    
@@ -61,6 +63,7 @@ class ODrive:
             dump_errors(self.__connected_odrive)
             return False
         
+        self.__watchdog_enabled = True
         return True
 
     def __stop_watchdog(self):
@@ -143,6 +146,9 @@ class ODrive:
             return False
 
         if (self.__is_engaged):
+            if (not self.__watchdog_enabled):
+                self.__start_watchdog()
+
             if (axis == 0):
                 if (not self.__connected_odrive.axis0.config.enable_watchdog):
                     self.__connected_odrive.axis0.config.enable_watchdog = True

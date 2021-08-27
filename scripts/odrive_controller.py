@@ -44,8 +44,8 @@ if __name__ == '__main__':
             if (my_drive.engage_motors()):
                 setup_node()       
     finally:
-        if (not my_drive.is_connected):
-            my_drive.shutdown()
+        
+        my_drive.shutdown()
             
     
     
