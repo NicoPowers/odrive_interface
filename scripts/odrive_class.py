@@ -115,11 +115,14 @@ class ODrive:
         elif (response == 'Y'):
             print("STATUS: Resetting Watchdog Timer on axis {}".format(axis))
             if (axis == 0):
+                self.__connected_odrive.axis0.config.enable_watchdog = False
                 self.__connected_odrive.axis0.error = 0
-                self.__connected_odrive.axis0.config.enable_watchdog = False                
+                                
             else:
-                self.__connected_odrive.axis1.error = 0
                 self.__connected_odrive.axis1.config.enable_watchdog = False
+                self.__connected_odrive.axis1.error = 0
+            
+            self.clear_errors()
             self.__watchdog_enabled = False
         
 
