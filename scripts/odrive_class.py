@@ -106,12 +106,12 @@ class ODrive:
         sleep(0.25)
 
         if (axis == 0):
-            if (self.__connected_odrive.axis0.curent_state != requested_state):
+            if (self.__connected_odrive.axis0.current_state != requested_state):
                 print("ERROR: Requested state change for axis 0 could not resolve. \n")
                 dump_errors(self.__connected_odrive)
                 return False
         else:
-            if (self.__connected_odrive.axis1.curent_state != requested_state):
+            if (self.__connected_odrive.axis1.current_state != requested_state):
                 print("ERROR: Requested state change for axis 1 could not resolve. \n")
                 dump_errors(self.__connected_odrive)
                 return False
