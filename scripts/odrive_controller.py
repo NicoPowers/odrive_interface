@@ -41,7 +41,7 @@ def setup_node():
         if (last != None):
             # check to see the last time a cmd_vel was received
             now = rospy.get_rostime()
-            if (now - last) > 5:
+            if (now - last) > rospy.Duration(5):
                 global ignore
                 ignore = True
             else:
