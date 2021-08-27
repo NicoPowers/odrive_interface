@@ -12,7 +12,7 @@ class ODrive:
     is_connected = False
 
     __connected_odrive = None
-    __watchdog_timeout = 5
+    __watchdog_timeout = 10
     __watchdog_enabled = False
     __shutdown_token = Event()
     __is_calibrated = False
@@ -60,6 +60,7 @@ class ODrive:
         self.__connected_odrive.axis0.error = 0
         self.__connected_odrive.axis1.error = 0
         self.__connected_odrive.error = 0
+        self.__watchdog_enabled = False
 
 
     def __wait_for_calibration(self):
@@ -122,15 +123,8 @@ class ODrive:
     def __handle_response(self, axis, response):
                 
         if (response == 'Y'):
-            print("STATUS: Resetting Watchdog Timer on axis {}".format(axis))
-            if (axis == 0):
-                self.__connected_odrive.axis0.config.enable_watchdog = False                
-                                
-            else:
-                self.__connected_odrive.axis1.config.enable_watchdog = False                
-            
-            self.__clear_errors()
-            self.__watchdog_enabled = False
+            print("STATUS: Resetting Watchdog Timer on axis {}".format(axis))  
+            self.__clear_errors()            
             return True
 
         elif (response == 'N'):
