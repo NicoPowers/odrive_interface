@@ -28,7 +28,7 @@ def velocity_callback(data: VelocityControl):
 
 def setup_node():    
     rospy.init_node('odrive_interface')
-    rospy.Subscriber("odrive_cmd_vel", VelocityControl, velocity_callback)
+    rospy.Subscriber("odrive_cmd_vel", VelocityControl, velocity_callback, queue_size=1)
     print("odrive_interface node launched, ready to receive commands...\n")
     rospy.spin()
 
