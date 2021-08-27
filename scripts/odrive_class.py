@@ -54,6 +54,9 @@ class ODrive:
         return False
 
     def __clear_errors(self):
+        self.__connected_odrive.axis0.config.enable_watchdog = False
+        self.__connected_odrive.axis1.config.enable_watchdog = False
+        self.__connected_odrive.clear_errors()
         self.__connected_odrive.axis0.error = 0
         self.__connected_odrive.axis1.error = 0
         self.__connected_odrive.error = 0
