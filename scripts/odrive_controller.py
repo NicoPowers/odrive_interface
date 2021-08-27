@@ -16,7 +16,7 @@ from fibre import Event
 
 my_drive = None
 ignore = False
-last = rospy.get_rostime()
+last = None
 
 
 def velocity_callback(data: VelocityControl):
@@ -38,13 +38,14 @@ def setup_node():
     r = rospy.Rate(0.25)
 
     while(True):
-        # check to see the last time a cmd_vel was received
-        now = rospy.get_rostime()
-        if (now - last) > 5:
-            global ignore
-            ignore = True
-        else:
-            ignore = False
+        if (last != None):
+            # check to see the last time a cmd_vel was received
+            now = rospy.get_rostime()
+            if (now - last) > 5:
+                global ignore
+                ignore = True
+            else:
+                ignore = False
         r.sleep()
 
 
