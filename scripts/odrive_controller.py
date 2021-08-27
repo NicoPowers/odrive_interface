@@ -15,8 +15,8 @@ from fibre import Event
 
 
 my_drive = None
-last = None
 ignore = False
+last = rospy.get_rostime()
 
 
 def velocity_callback(data: VelocityControl):
@@ -35,7 +35,7 @@ def setup_node():
     rospy.init_node('odrive_interface')
     rospy.Subscriber("odrive_cmd_vel", VelocityControl, velocity_callback, queue_size=1)
     print("odrive_interface node launched, ready to receive commands...\n")
-    r = rospy.Rate(1)
+    r = rospy.Rate(0.25)
 
     while(True):
         # check to see the last time a cmd_vel was received
@@ -43,6 +43,8 @@ def setup_node():
         if (now - last) > 5:
             global ignore
             ignore = True
+        else:
+            ignore = False
         r.sleep()
 
 
