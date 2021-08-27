@@ -26,14 +26,17 @@ class ODrive:
             print("STATUS: ODrive detected, launching odrive_interface node...\n")
             
             if (self.__has_errors()):
-                print("ERROR: ODrive module has errors, trying to reboot to flush errors...\n")
+                print("STATUS: ODrive module has errors, going to clear errors...\n")
                 dump_errors(self.__connected_odrive)
-                self.__connected_odrive.reboot()
-                self.is_connected = False
+                self.__connected_odrive.axis0.error = 0
+                self.__connected_odrive.axis1.error = 0
             
-            else:
-                self.is_connected = True
-                self.__watchdog_timeout = watchdog_timeout
+
+            # set watchdog timer timeout
+            self.__connected_odrive.axis0.config.watchdog_timeout = self.__watchdog_timeout
+            self.__connected_odrive.axis1.config.watchdog_timeout = self.__watchdog_timeout
+
+            self.is_connected = True
 
         except TimeoutError:
             print("ERROR: Could not find an ODrive.\n")
@@ -47,29 +50,6 @@ class ODrive:
         
         return False
 
-    def __start_watchdog(self):
-
-        # set watchdog timer timeout
-        self.__connected_odrive.axis0.config.watchdog_timeout = self.__watchdog_timeout
-        self.__connected_odrive.axis1.config.watchdog_timeout = self.__watchdog_timeout
-
-        # enable watchdog timer for each motor
-        self.__connected_odrive.axis0.config.enable_watchdog = True
-        self.__connected_odrive.axis1.config.enable_watchdog = True
-
-        if (self.__has_errors()):
-            print("ERROR: Failed to initialize Watchdog Timer.\n")
-            dump_errors(self.__connected_odrive)
-            return False
-        
-        self.__watchdog_enabled = True
-        return True
-
-    def __stop_watchdog(self):
-
-        # disable the watchdog timer for each motor
-        self.__connected_odrive.axis0.config.enable_watchdog = False
-        self.__connected_odrive.axis1.config.enable_watchdog = False
 
     def __wait_for_calibration(self):
         while (self.__connected_odrive.axis0.current_state != AXIS_STATE_IDLE) or (self.__connected_odrive.axis1.current_state != AXIS_STATE_IDLE):
@@ -132,23 +112,22 @@ class ODrive:
         # stop robot if moving
         self.disengage_motors()
 
-        # disable watchdog timer
-        self.__stop_watchdog()
-
         # release USB control from ODrive
         self.__shutdown_token.set()
 
     def set_velocity(self, axis, velocity):
         if (self.__is_engaged):
-            self.__connected_odrive.clear_errors()
-            
             if (axis == 0):
-                if (not self.__connected_odrive.axis0.config.enable_watchdog):
+                if(self.__connected_odrive.axis0.error):
+                    self.__connected_odrive.axis0.error = 0
                     self.__connected_odrive.axis0.config.enable_watchdog = True
+                     
                 self.__connected_odrive.axis0.controller.input_vel = velocity
             elif (axis == 1):
-                if (not self.__connected_odrive.axis1.config.enable_watchdog):
+                if(self.__connected_odrive.axis1.error):
+                    self.__connected_odrive.axis1.error = 0
                     self.__connected_odrive.axis1.config.enable_watchdog = True
+
                 self.__connected_odrive.axis1.controller.input_vel = velocity
             else:
                 print("ERROR: Incorrect axis specified: {}\n".format(axis))
