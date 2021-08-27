@@ -1,4 +1,5 @@
-from re import T
+#!/usr/bin/env python3
+
 import odrive
 from odrive.utils import *
 from odrive.enums import *
