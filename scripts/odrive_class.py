@@ -156,6 +156,7 @@ class ODrive:
                     self.__handle_response(0, response)
                 else:    
                     self.__connected_odrive.axis0.controller.input_vel = velocity
+                    self.__connected_odrive.axis0.watchdog_feed()
 
             elif (axis == 1):
                 if(self.__connected_odrive.axis1.error == AXIS_ERROR_WATCHDOG_TIMER_EXPIRED):
@@ -163,6 +164,7 @@ class ODrive:
                     self.__handle_response(1, response)
                 else:    
                     self.__connected_odrive.axis1.controller.input_vel = velocity
+                    self.__connected_odrive.axis1.watchdog_feed()
                                     
             else:
                 print("ERROR: Incorrect axis specified: {}\n".format(axis))
