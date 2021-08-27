@@ -24,8 +24,9 @@ class ODrive:
             print("STATUS: ODrive detected, launching odrive_interface node...\n")
             
             if (self.__has_errors()):
-                print("ERROR: ODrive module has errors, trying rebooting it to flush errors.\n")
+                print("ERROR: ODrive module has errors, trying to reboot to flush errors...\n")
                 dump_errors(self.__connected_odrive)
+                self.__connected_odrive.reboot()
                 self.is_connected = False
             
             else:
