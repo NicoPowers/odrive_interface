@@ -20,8 +20,7 @@ terminate = False
 last = None
 
 def watchdog():
-    global last, ignore, terminate
-    
+    global last, ignore, terminate, my_drive
 
     while(True):
         if (terminate):
@@ -29,8 +28,9 @@ def watchdog():
 
         if (last != None):
             now = rospy.get_rostime()            
-            if ((now.to_sec() - last.to_sec()) > 3.0):
-                ignore = True            
+            if ((now.to_sec() - last.to_sec()) > 5.0):
+                ignore = True
+                my_drive.disengage_motors()            
 
         time.sleep(0.1)
 
@@ -42,8 +42,7 @@ def velocity_callback(data: VelocityControl):
     
     last = rospy.get_rostime()
 
-    if (ignore):
-        my_drive.disengage_motors()
+    if (ignore):        
 
         response = input("ERROR: Watchdog Timer expired.\nPress 'Enter' to reset Watchdog Timer: ")
         if (response == ""):
