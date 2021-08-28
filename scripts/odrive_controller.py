@@ -28,14 +28,11 @@ def watchdog():
             break
 
         if (last != None):
-            now = rospy.get_rostime()
-            print("Time difference: ", now.to_sec() - last.to_sec())
+            now = rospy.get_rostime()            
             if ((now.to_sec() - last.to_sec()) > 5.0):
-                ignore = True
-            else:
-                ignore = False
+                ignore = True            
 
-        time.sleep(0.5)
+        time.sleep(0.25)
 
 def velocity_callback(data: VelocityControl):
     print("STATUS: Received velocity for axis 0: {}".format(data.axis0_velocity))
@@ -44,6 +41,10 @@ def velocity_callback(data: VelocityControl):
     global my_drive, last, ignore
     
     last = rospy.get_rostime()
+    if (ignore):
+        response = input("ERROR: Watchdog Timer expired.\nPress 'Enter' to reset Watchdog Timer: ")
+        if (response == ""):
+            ignore = False
 
     if (not ignore):
         my_drive.set_velocity(0, -data.axis0_velocity)
@@ -54,7 +55,7 @@ def setup_node():
     rospy.Subscriber("odrive_cmd_vel", VelocityControl, velocity_callback, queue_size=1)
     print("odrive_interface node launched, ready to receive commands...\n")
 
-    watchdog_thread = threading.Thread(target=watchdog, daemon=False)
+    watchdog_thread = threading.Thread(target=watchdog)
     watchdog_thread.start()
 
     rospy.spin()    
