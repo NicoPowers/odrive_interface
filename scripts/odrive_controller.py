@@ -28,7 +28,7 @@ def watchdog():
                 ignore = True
             else:
                 ignore = False
-                
+
         time.sleep(0.5)
 
 def velocity_callback(data: VelocityControl):
@@ -48,7 +48,7 @@ def setup_node():
     rospy.Subscriber("odrive_cmd_vel", VelocityControl, velocity_callback, queue_size=1)
     print("odrive_interface node launched, ready to receive commands...\n")
 
-    watchdog_thread = threading.Thread(target=watchdog)
+    watchdog_thread = threading.Thread(target=watchdog, daemon=False)
     watchdog_thread.start()
 
     rospy.spin()
