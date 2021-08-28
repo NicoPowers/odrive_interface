@@ -20,10 +20,11 @@ last = None
 
 def watchdog():
     global last
-
-    print("WATCHDOG RAN")
     now = rospy.get_rostime()
-    time.sleep(0.5)
+
+    while(True):
+        print("WATCHDOG RAN")
+        time.sleep(0.5)
 
 def velocity_callback(data: VelocityControl):
     print("STATUS: Received velocity for axis 0: {}".format(data.axis0_velocity))
@@ -44,7 +45,7 @@ def setup_node():
 
     watchdog_thread = threading.Thread(target=watchdog)
     watchdog_thread.start()
-    
+
     rospy.spin()
       
 
