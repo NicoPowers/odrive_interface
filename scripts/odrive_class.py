@@ -13,7 +13,7 @@ class ODrive:
     is_connected = False
 
     __connected_odrive = None
-    __shutdown_token = Event()
+    __disconnect_token = Event()
     __is_calibrated = False
     __is_engaged = False    
 
@@ -21,7 +21,7 @@ class ODrive:
         try:
             # try to find ODrive, if no ODrive can be found within 5 seconds, notify user
             print("STATUS: Trying to find an ODrive...\n")
-            self.__connected_odrive = odrive.find_any(timeout=5, channel_termination_token=self.__shutdown_token)
+            self.__connected_odrive = odrive.find_any(timeout=5, channel_termination_token=self.__disconnect_token)
             print("STATUS: ODrive detected, launching odrive_interface node...\n")
             
             if (self.__has_errors()):
@@ -110,13 +110,13 @@ class ODrive:
         return True
         
 
-    def shutdown(self):
+    def disconnect(self):
         # stop robot if moving
         self.disengage_motors()
 
         # release USB control from ODrive
-        self.__shutdown_token.set()
-        
+        self.__disconnect_token.set()
+
         self.is_connected = False
 
     def set_velocity(self, axis, velocity):
@@ -203,6 +203,9 @@ class ODrive:
 
     def disengage_motors(self):
 
+        # setting velocity to 0 before changing state to idle may help reduce errors in overspeed and unknown torque
+        self.set_velocity(0, 0)
+        self.set_velocity(1, 0)
         self.__change_state(0, AXIS_STATE_IDLE)
         self.__change_state(1, AXIS_STATE_IDLE)
         self.__is_engaged = False

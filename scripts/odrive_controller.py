@@ -88,7 +88,7 @@ if __name__ == '__main__':
 
     finally:
         if (my_drive.is_connected):
-            my_drive.shutdown()        
+            my_drive.disconnect()        
             
     
     
