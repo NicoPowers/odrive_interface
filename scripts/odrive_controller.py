@@ -24,6 +24,7 @@ def watchdog():
 
     while(True):
         if (last != None):
+            print("Time difference: ", now.to_sec() - last.to_sec())
             if ((now.to_sec() - last.to_sec()) > 5.0):
                 ignore = True
             else:
@@ -68,8 +69,8 @@ if __name__ == '__main__':
                 setup_node()    
 
     finally:
-        
         my_drive.shutdown()
+        sys.exit()
             
     
     
