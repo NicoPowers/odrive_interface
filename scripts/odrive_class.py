@@ -190,7 +190,7 @@ class ODrive:
 
 
     def calibrate(self):
-        if (self.__connected_odrive.axis0.motor.is_calibrated and self.__connected_odrive.axis1.motor.is_calibrated and self.__connected_odrive.axis0.encoder.is_calibrated and self.__connected_odrive.axis1.encoder.is_calibrated):
+        if (self.__connected_odrive.axis0.motor.is_calibrated and self.__connected_odrive.axis1.motor.is_calibrated and self.__connected_odrive.axis0.encoder.index_found and self.__connected_odrive.axis1.encoder.index_found):
             print("STATUS: ODrive already calibrated.\n")
 
         else:
