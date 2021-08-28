@@ -16,14 +16,19 @@ from fibre import Event
 
 my_drive = None
 ignore = False
+terminate = False
 last = None
 
 def watchdog():
-    global last, ignore
-    now = rospy.get_rostime()
+    global last, ignore, terminate
+    
 
     while(True):
+        if (terminate):
+            break
+
         if (last != None):
+            now = rospy.get_rostime()
             print("Time difference: ", now.to_sec() - last.to_sec())
             if ((now.to_sec() - last.to_sec()) > 5.0):
                 ignore = True
@@ -52,7 +57,9 @@ def setup_node():
     watchdog_thread = threading.Thread(target=watchdog, daemon=False)
     watchdog_thread.start()
 
-    rospy.spin()
+    rospy.spin()    
+    global terminate
+    terminate = True
       
 
 
@@ -69,8 +76,7 @@ if __name__ == '__main__':
                 setup_node()    
 
     finally:
-        my_drive.shutdown()
-        sys.exit()
+        my_drive.shutdown()        
             
     
     
