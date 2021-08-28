@@ -27,7 +27,7 @@ def watchdog():
 
         if (last != None):
             now = rospy.get_rostime()            
-            if ((now.to_sec() - last.to_sec()) > 2):
+            if ((now.to_sec() - last.to_sec()) > 5):
                 ignore = True
                 my_drive.disengage_motors()            
 

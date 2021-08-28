@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from re import T
 import odrive
 from odrive.utils import *
 from odrive.enums import *
@@ -193,6 +194,13 @@ class ODrive:
 
         print("ERROR: Motors failed to engage.\n")
         dump_errors(self.__connected_odrive)
+        
+        response = input("Press 'Enter' to clear errors and try again: ")
+        if (response == ""):
+            self.__clear_errors()
+            if(self.__connected_odrive.engage_motors()):
+                return True
+            
         return False
 
     def disengage_motors(self):
