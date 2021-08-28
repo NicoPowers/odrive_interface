@@ -19,11 +19,16 @@ ignore = False
 last = None
 
 def watchdog():
-    global last
+    global last, ignore
     now = rospy.get_rostime()
 
     while(True):
-        print("WATCHDOG RAN")
+        if (last != None):
+            if ((now.to_sec() - last.to_sec()) > 5.0):
+                ignore = True
+            else:
+                ignore = False
+                
         time.sleep(0.5)
 
 def velocity_callback(data: VelocityControl):
