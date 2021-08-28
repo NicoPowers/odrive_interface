@@ -43,7 +43,6 @@ def velocity_callback(data: VelocityControl):
     last = rospy.get_rostime()
 
     if (ignore):        
-
         response = input("ERROR: Watchdog Timer expired.\nPress 'Enter' to reset Watchdog Timer: ")
         if (response == ""):
             my_drive.engage_motors()
