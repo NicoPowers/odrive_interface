@@ -12,8 +12,6 @@ class ODrive:
     is_connected = False
 
     __connected_odrive = None
-    __watchdog_timeout = 10
-    __watchdog_enabled = False
     __shutdown_token = Event()
     __is_calibrated = False
     __is_engaged = False    
@@ -33,11 +31,6 @@ class ODrive:
                     print("ERROR: Clearing errors did not working, rebooting Odrive...")
                     self.__connected_odrive.reboot()
             
-
-            # set watchdog timer timeout
-            # self.__watchdog_timeout = watchdog_timeout
-            # self.__connected_odrive.axis0.config.watchdog_timeout = self.__watchdog_timeout
-            # self.__connected_odrive.axis1.config.watchdog_timeout = self.__watchdog_timeout
 
             self.is_connected = True
 
@@ -60,7 +53,6 @@ class ODrive:
         self.__connected_odrive.axis0.error = 0
         self.__connected_odrive.axis1.error = 0
         self.__connected_odrive.error = 0
-        self.__watchdog_enabled = False
 
 
     def __wait_for_calibration(self):
@@ -119,21 +111,6 @@ class ODrive:
                 return False
         
         return True
-
-    def __handle_response(self, axis, response):
-                
-        if (response == 'Y'):
-            print("STATUS: Resetting Watchdog Timer on axis {}".format(axis))  
-            self.__clear_errors()            
-            return True
-
-        elif (response == 'N'):
-            print("STATUS: You chose to not re-enable the Watchdog Timer.\n")
-            return False
-        
-        else:
-            print("ERROR: Incorrect option: {}".format(response))
-            return False
         
 
     def shutdown(self):
@@ -145,32 +122,12 @@ class ODrive:
 
     def set_velocity(self, axis, velocity):
         if (self.__is_engaged):
-            # if (not self.__watchdog_enabled):
-            #     self.__connected_odrive.axis0.config.enable_watchdog = True
-            #     self.__connected_odrive.axis1.config.enable_watchdog = True
-            #     self.__watchdog_enabled = True
 
             if (axis == 0):
-                # if(self.__connected_odrive.axis0.error == AXIS_ERROR_WATCHDOG_TIMER_EXPIRED):
-                #     response = input("ERROR: Watchdog Timer on axis 0 expired, cannot move axis 0.\n Do you want to reset the Watchdog Timer on axis 0? (Y/N): ")                    
-                #     if(self.__handle_response(0, response)):
-                #         self.__connected_odrive.axis0.controller.input_vel = velocity
-                #         self.__connected_odrive.axis0.watchdog_feed()
-                # else:    
-                #     self.__connected_odrive.axis0.controller.input_vel = velocity
-                #     self.__connected_odrive.axis0.watchdog_feed()
 
                 self.__connected_odrive.axis0.controller.input_vel = velocity
 
             elif (axis == 1):
-                # if(self.__connected_odrive.axis1.error == AXIS_ERROR_WATCHDOG_TIMER_EXPIRED):
-                #     response = input("ERROR: Watchdog Timer on axis 1 expired, cannot move axis 1.\n Do you want to reset the Watchdog Timer on axis 1? (Y/N): ")                    
-                #     if(self.__handle_response(1, response)):
-                #         self.__connected_odrive.axis1.controller.input_vel = velocity
-                #         self.__connected_odrive.axis1.watchdog_feed()
-                # else:    
-                #     self.__connected_odrive.axis1.controller.input_vel = velocity
-                #     self.__connected_odrive.axis1.watchdog_feed()
                                     
                 self.__connected_odrive.axis1.controller.input_vel = velocity
             else:

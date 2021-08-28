@@ -8,7 +8,6 @@ import sys
 import threading
 import time
 import rospy
-import odrive
 from odrive.enums import *
 from odrive.utils import *
 from fibre import Event
@@ -28,7 +27,7 @@ def watchdog():
 
         if (last != None):
             now = rospy.get_rostime()            
-            if ((now.to_sec() - last.to_sec()) > 5.0):
+            if ((now.to_sec() - last.to_sec()) > 2):
                 ignore = True
                 my_drive.disengage_motors()            
 
@@ -36,8 +35,7 @@ def watchdog():
 
 def velocity_callback(data: VelocityControl):
     print("STATUS: Received velocity for axis 0: {}".format(data.axis0_velocity))
-    print("STATUS: Received velocity for axis 1: {}".format(data.axis1_velocity))    
-    print("HEADER: ", data.header.stamp.secs)
+    print("STATUS: Received velocity for axis 1: {}".format(data.axis1_velocity))        
     global my_drive, last, ignore
     
     last = rospy.get_rostime()
