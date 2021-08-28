@@ -17,7 +17,7 @@ class ODrive:
     __is_calibrated = False
     __is_engaged = False    
 
-    def __init__(self, watchdog_timeout=5):
+    def __init__(self):
         try:
             # try to find ODrive, if no ODrive can be found within 5 seconds, notify user
             print("STATUS: Trying to find an ODrive...\n")
@@ -27,11 +27,7 @@ class ODrive:
             if (self.__has_errors()):
                 print("STATUS: ODrive module has errors, going to clear errors...\n")
                 dump_errors(self.__connected_odrive)
-                self.__clear_errors()
-                if (self.__has_errors()):
-                    print("ERROR: Clearing errors did not working, rebooting Odrive...")
-                    self.__connected_odrive.reboot()
-            
+                self.__clear_errors()            
 
             self.is_connected = True
 
@@ -120,6 +116,8 @@ class ODrive:
 
         # release USB control from ODrive
         self.__shutdown_token.set()
+        
+        self.is_connected = False
 
     def set_velocity(self, axis, velocity):
         if (self.__is_engaged):

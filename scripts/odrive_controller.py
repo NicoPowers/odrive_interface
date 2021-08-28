@@ -25,18 +25,19 @@ last_time = Time()
 def watchdog():
     global last_time, watchdog_timer_expired, watchdog_alive, my_drive, communication_started
 
+    # wait unitl the first message has been received to start the watchdog
     while(not communication_started):
         pass
 
     while(watchdog_alive):
+        if (not watchdog_timer_expired):
+            now = rospy.get_rostime()
 
-        now = rospy.get_rostime()
+            if (abs(now.to_sec() - last_time.to_sec()) > watchdog_timeout):
+                watchdog_timer_expired = True
+                my_drive.disengage_motors()            
 
-        if (abs(now.to_sec() - last_time.to_sec()) > watchdog_timeout):
-            watchdog_timer_expired = True
-            my_drive.disengage_motors()            
-
-        time.sleep(0.1)
+            time.sleep(0.1)
 
 def velocity_callback(data: VelocityControl):
     global my_drive, last_time, watchdog_timer_expired, communication_started
@@ -55,7 +56,7 @@ def velocity_callback(data: VelocityControl):
             my_drive.engage_motors()
             watchdog_timer_expired = False
 
-    if (not watchdog_timer_expired):
+    else:
         my_drive.set_velocity(0, -data.axis0_velocity)
         my_drive.set_velocity(1, data.axis1_velocity)
 
@@ -66,18 +67,17 @@ def setup_node():
     watchdog_thread = threading.Thread(target=watchdog)
     watchdog_thread.start()
 
-    print("odrive_interface node launched, ready to receive commands...\n")
+    print("STATUS: odrive_interface node launched, ready to receive commands...\n")
     rospy.spin()    
+    print("STATUS: odrive_interface node terminated.\n")
 
     global watchdog_alive
     watchdog_alive = False
       
 
-
 if __name__ == '__main__':    
     try:
-        
-        my_drive = ODrive(watchdog_timeout=5)
+        my_drive = ODrive()
 
         if (not my_drive.is_connected):
             sys.exit()
@@ -87,7 +87,8 @@ if __name__ == '__main__':
                 setup_node()    
 
     finally:
-        my_drive.shutdown()        
+        if (my_drive.is_connected):
+            my_drive.shutdown()        
             
     
     
