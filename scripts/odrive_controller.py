@@ -11,56 +11,66 @@ import rospy
 from odrive.enums import *
 from odrive.utils import *
 from fibre import Event
+from rospy.rostime import Time
 
+# global definitions
 
 my_drive = None
-ignore = False
-terminate = False
-last = None
+communication_started = False                 
+watchdog_timer_expired = False   
+watchdog_alive = True
+watchdog_timeout = 5
+last_time = Time()
 
 def watchdog():
-    global last, ignore, terminate, my_drive
+    global last_time, watchdog_timer_expired, watchdog_alive, my_drive, communication_started
 
-    while(True):
-        if (terminate):
-            break
+    while(not communication_started):
+        pass
 
-        if (last != None):
-            now = rospy.get_rostime()            
-            if ((now.to_sec() - last.to_sec()) > 5):
-                ignore = True
-                my_drive.disengage_motors()            
+    while(watchdog_alive):
+
+        now = rospy.get_rostime()
+
+        if (abs(now.to_sec() - last_time.to_sec()) > watchdog_timeout):
+            watchdog_timer_expired = True
+            my_drive.disengage_motors()            
 
         time.sleep(0.1)
 
 def velocity_callback(data: VelocityControl):
+    global my_drive, last_time, watchdog_timer_expired, communication_started
+    
     print("STATUS: Received velocity for axis 0: {}".format(data.axis0_velocity))
     print("STATUS: Received velocity for axis 1: {}".format(data.axis1_velocity))        
-    global my_drive, last, ignore
     
-    last = rospy.get_rostime()
+    if (not communication_started):
+        communication_started = True
+    
+    last_time = rospy.get_rostime()
 
-    if (ignore):        
+    if (watchdog_timer_expired):        
         response = input("ERROR: Watchdog Timer expired.\nPress 'Enter' to reset Watchdog Timer: ")
         if (response == ""):
             my_drive.engage_motors()
-            ignore = False
+            watchdog_timer_expired = False
 
-    if (not ignore):
+    if (not watchdog_timer_expired):
         my_drive.set_velocity(0, -data.axis0_velocity)
         my_drive.set_velocity(1, data.axis1_velocity)
 
 def setup_node():    
     rospy.init_node('odrive_interface')
     rospy.Subscriber("odrive_cmd_vel", VelocityControl, velocity_callback, queue_size=1)
-    print("odrive_interface node launched, ready to receive commands...\n")
-
+    
     watchdog_thread = threading.Thread(target=watchdog)
     watchdog_thread.start()
 
+    print("odrive_interface node launched, ready to receive commands...\n")
     rospy.spin()    
-    global terminate
-    terminate = True
+
+    global watchdog_alive
+    watchdog_alive = False
       
 
 
