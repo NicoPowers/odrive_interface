@@ -190,22 +190,27 @@ class ODrive:
 
 
     def calibrate(self):
-        # start full motor calibration sequence
-        print("STATUS: Beginning full calibration sequence...\n")
-        
-        self.__connected_odrive.axis0.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
-        self.__connected_odrive.axis1.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
-        # calibrated can take a while, so wait around 60 seconds max for both motors to be fully calibrated
-        # each axis will return to idle state after calibration
-        calibration_thread = threading.Thread(target=self.__wait_for_calibration)
-        calibration_thread.start()
-        calibration_thread.join(timeout=60)
+        if (self.__connected_odrive.axis0.motor.pre_calibrated and self.__connected_odrive.axis1.motor.pre_calibrated and self.__connected_odrive.axis0.encoder.pre_calibrated and self.__connected_odrive.axis1.encoder.pre_calibrated):
+            print("STATUS: ODrive already calibrated.\n")
 
-        # check if thread timed out or not
-        if (calibration_thread.isAlive()):
-            print("ERROR: Calibration could not resolve in time.\n")
-            dump_errors(self.__connected_odrive)
-            return False
+        else:
+
+            # start full motor calibration sequence
+            print("STATUS: Beginning full calibration sequence...\n")
+            
+            self.__connected_odrive.axis0.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
+            self.__connected_odrive.axis1.requested_state = AXIS_STATE_FULL_CALIBRATION_SEQUENCE
+            # calibrated can take a while, so wait around 60 seconds max for both motors to be fully calibrated
+            # each axis will return to idle state after calibration
+            calibration_thread = threading.Thread(target=self.__wait_for_calibration)
+            calibration_thread.start()
+            calibration_thread.join(timeout=60)
+
+            # check if thread timed out or not
+            if (calibration_thread.isAlive()):
+                print("ERROR: Calibration could not resolve in time.\n")
+                dump_errors(self.__connected_odrive)
+                return False
         
         self.__is_calibrated = True
         return True
