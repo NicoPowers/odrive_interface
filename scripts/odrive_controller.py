@@ -37,10 +37,11 @@ def watchdog():
 def velocity_callback(data: VelocityControl):
     print("STATUS: Received velocity for axis 0: {}".format(data.axis0_velocity))
     print("STATUS: Received velocity for axis 1: {}".format(data.axis1_velocity))    
-    
+    print("HEADER: ", data.header)
     global my_drive, last, ignore
     
     last = rospy.get_rostime()
+
     if (ignore):
         my_drive.disengage_motors()
 
