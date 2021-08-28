@@ -38,15 +38,18 @@ def setup_node():
     r = rospy.Rate(0.25)
 
     while(True):
-        if (last != None):
-            # check to see the last time a cmd_vel was received
-            now = rospy.get_rostime()
-            if (now - last) > rospy.Duration(5):
-                global ignore
-                ignore = True
-            else:
-                ignore = False
-        r.sleep()
+        try:
+            if (last != None):
+                # check to see the last time a cmd_vel was received
+                now = rospy.get_rostime()
+                if (now - last) > rospy.Duration(5):
+                    global ignore
+                    ignore = True
+                else:
+                    ignore = False
+            r.sleep()
+        except KeyboardInterrupt:
+            return None
 
 
 if __name__ == '__main__':    
@@ -59,7 +62,8 @@ if __name__ == '__main__':
         
         if (my_drive.calibrate()):
             if (my_drive.engage_motors()):
-                setup_node()       
+                setup_node()    
+
     finally:
         
         my_drive.shutdown()
