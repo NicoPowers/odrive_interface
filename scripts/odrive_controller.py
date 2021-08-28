@@ -18,6 +18,12 @@ my_drive = None
 ignore = False
 last = None
 
+def watchdog():
+    global last
+
+    print("WATCHDOG RAN")
+    now = rospy.get_rostime()
+    time.sleep(0.5)
 
 def velocity_callback(data: VelocityControl):
     print("STATUS: Received velocity for axis 0: {}".format(data.axis0_velocity))
@@ -35,21 +41,12 @@ def setup_node():
     rospy.init_node('odrive_interface')
     rospy.Subscriber("odrive_cmd_vel", VelocityControl, velocity_callback, queue_size=1)
     print("odrive_interface node launched, ready to receive commands...\n")
-    r = rospy.Rate(0.25)
 
-    while(True):
-        try:
-            if (last != None):
-                # check to see the last time a cmd_vel was received
-                now = rospy.get_rostime()
-                if (now - last) > rospy.Duration(5):
-                    global ignore
-                    ignore = True
-                else:
-                    ignore = False
-            r.sleep()
-        except KeyboardInterrupt:
-            return None
+    watchdog_thread = threading.Thread(target=watchdog)
+    watchdog_thread.start()
+    
+    rospy.spin()
+      
 
 
 if __name__ == '__main__':    
