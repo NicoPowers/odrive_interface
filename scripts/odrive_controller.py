@@ -78,16 +78,14 @@ if __name__ == '__main__':
     try:
         my_drive = ODrive()
 
-        if (not my_drive.is_connected):
-            sys.exit()
-        
-        if (my_drive.calibrate()):
-            if (my_drive.engage_motors()):
-                setup_node()    
+        if (my_drive.is_connected):
+            if (my_drive.calibrate()):
+                if (my_drive.engage_motors()):
+                    setup_node()    
 
     finally:
-        if (my_drive.is_connected):
-            my_drive.disconnect()        
+        my_drive.disconnect()
+        sys.exit()        
             
     
     
