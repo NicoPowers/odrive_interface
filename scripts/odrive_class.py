@@ -62,7 +62,7 @@ class ODrive:
             return False
 
         # small delay to allow changes take place, but it may not be needed
-        sleep(0.50)
+        # sleep(0.50)
 
         if (axis == 0):
             if (self.__connected_odrive.axis0.controller.config.control_mode != requested_control_mode):
@@ -90,7 +90,7 @@ class ODrive:
             return False
 
         # small delay to allow changes take place, but it may not be needed
-        sleep(0.50)
+        # sleep(0.50)
 
         if (axis == 0):
             if (self.__connected_odrive.axis0.current_state != requested_state):
