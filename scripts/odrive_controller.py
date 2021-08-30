@@ -19,7 +19,7 @@ my_drive = None
 communication_started = False                 
 watchdog_timer_expired = False   
 watchdog_alive = True
-watchdog_timeout = 0.25
+watchdog_timeout = 2
 last_time = Time()
 
 def watchdog():
