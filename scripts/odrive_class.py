@@ -152,6 +152,9 @@ class ODrive:
 
         else:
 
+            # clear errors before beginning calibration
+            self.__clear_errors()
+            
             # start full motor calibration sequence
             print("STATUS: Beginning full calibration sequence...\n")
             
@@ -193,12 +196,6 @@ class ODrive:
 
         print("ERROR: Motors failed to engage.\n")
         dump_errors(self.__connected_odrive)
-        
-        response = input("STATUS: Press 'Enter' to clear errors and try to engage motors again: ")
-        if (response == ""):
-            self.__clear_errors()
-            if(self.__connected_odrive.engage_motors()):
-                return True
             
         return False
 

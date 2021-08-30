@@ -82,7 +82,11 @@ if __name__ == '__main__':
         if (my_drive.is_connected):
             if (my_drive.calibrate()):
                 if (my_drive.engage_motors()):
-                    setup_node()    
+                    setup_node()
+                else:
+                    print("ERROR: ODrive failed to engage motors, check for errors.\n") 
+        else:
+            print("ERROR: ODrive failed to calibrate, check for errors.\n")   
 
     finally:
         my_drive.disconnect()
