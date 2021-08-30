@@ -53,10 +53,12 @@ def velocity_callback(data: VelocityControl):
         my_drive.engage_motors()
         watchdog_timer_expired = False        
     else:      
-        if (my_drive.set_velocity(0, -data.axis0_velocity) and my_drive.set_velocity(1, data.axis1_velocity)):
-            last_time = rospy.get_rostime()
+        if (not my_drive.set_velocity(0, -data.axis0_velocity)):
+            rospy.signal_shutdown("ERROR: Axis 0 has errors.\n")
+        elif (not my_drive.set_velocity(1, data.axis1_velocity)):
+            rospy.signal_shutdown("ERROR: Axis 1 has errors.\n")
         else:
-            rospy.signal_shutdown()
+            last_time = rospy.get_rostime()
         
 
     
