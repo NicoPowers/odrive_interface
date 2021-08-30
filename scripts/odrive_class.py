@@ -37,7 +37,6 @@ class ODrive:
 
 
     def __has_errors(self):
-
         if (self.__connected_odrive.axis0.error > 0 or self.__connected_odrive.axis1.error > 0 ):        
             return True
         
