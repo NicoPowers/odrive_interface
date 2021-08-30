@@ -53,10 +53,13 @@ def velocity_callback(data: VelocityControl):
         my_drive.engage_motors()
         watchdog_timer_expired = False        
     else:      
-        my_drive.set_velocity(0, -data.axis0_velocity)
-        my_drive.set_velocity(1, data.axis1_velocity)
+        if (my_drive.set_velocity(0, -data.axis0_velocity) and my_drive.set_velocity(1, data.axis1_velocity)):
+            last_time = rospy.get_rostime()
+        else:
+            rospy.signal_shutdown()
+        
 
-    last_time = rospy.get_rostime()    
+    
         
   
 
