@@ -174,7 +174,7 @@ class ODrive:
 
     def engage_motors(self):
         
-        # make sure robot doesn't start running away as soon as we engage them
+        # make sure robot doesn't start running away as soon as we engage the motors
         self.__connected_odrive.axis0.controller.input_vel = 0
         self.__connected_odrive.axis1.controller.input_vel = 0
 
@@ -193,7 +193,7 @@ class ODrive:
         print("ERROR: Motors failed to engage.\n")
         dump_errors(self.__connected_odrive)
         
-        response = input("Press 'Enter' to clear errors and try again: ")
+        response = input("STATUS: Press 'Enter' to clear errors and try to engage motors again: ")
         if (response == ""):
             self.__clear_errors()
             if(self.__connected_odrive.engage_motors()):
@@ -206,6 +206,8 @@ class ODrive:
         # setting velocity to 0 before changing state to idle may help reduce errors in overspeed and unknown torque
         self.set_velocity(0, 0)
         self.set_velocity(1, 0)
+
+        # disengage power from motors
         self.__change_state(0, AXIS_STATE_IDLE)
         self.__change_state(1, AXIS_STATE_IDLE)
         self.__is_engaged = False

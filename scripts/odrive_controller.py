@@ -45,10 +45,10 @@ def velocity_callback(data: VelocityControl):
     print("STATUS: Received velocity for axis 0: {}".format(data.axis0_velocity))
     print("STATUS: Received velocity for axis 1: {}".format(data.axis1_velocity))        
     
+    last_time = rospy.get_rostime()
+
     if (not communication_started):
         communication_started = True
-    
-    last_time = rospy.get_rostime()
 
     if (watchdog_timer_expired):        
         response = input("ERROR: Watchdog Timer expired.\nPress 'Enter' to reset Watchdog Timer: ")
