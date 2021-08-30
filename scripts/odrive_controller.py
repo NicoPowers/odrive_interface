@@ -39,7 +39,8 @@ def watchdog():
                 response = input("ERROR: Watchdog Timer expired.\nPress 'Enter' to reset Watchdog Timer: ")
                 if (response == ""):
                     my_drive.engage_motors()
-                    watchdog_timer_expired = False            
+                    watchdog_timer_expired = False
+                    last_time = rospy.get_rostime()            
 
             time.sleep(0.1)
 
