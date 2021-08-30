@@ -27,7 +27,7 @@ class ODrive:
             if (self.__has_errors()):
                 print("STATUS: ODrive module has errors, going to clear errors...\n")
                 dump_errors(self.__connected_odrive)
-                self.__clear_errors()            
+                self.clear_errors()            
 
             self.is_connected = True
 
@@ -43,7 +43,7 @@ class ODrive:
         
         return False
 
-    def __clear_errors(self):
+    def clear_errors(self):
         print("STATUS: Trying to clear errors for ODrive...\n")
         self.__connected_odrive.axis0.config.enable_watchdog = False
         self.__connected_odrive.axis1.config.enable_watchdog = False
@@ -150,11 +150,8 @@ class ODrive:
         if (self.__connected_odrive.axis0.motor.is_calibrated and self.__connected_odrive.axis1.motor.is_calibrated and self.__connected_odrive.axis0.encoder.index_found and self.__connected_odrive.axis1.encoder.index_found):
             print("STATUS: ODrive already calibrated.\n")
 
-        else:
-
-            # clear errors before beginning calibration
-            self.__clear_errors()
-            
+        else:           
+                        
             # start full motor calibration sequence
             print("STATUS: Beginning full calibration sequence...\n")
             

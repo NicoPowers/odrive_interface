@@ -80,6 +80,7 @@ if __name__ == '__main__':
         my_drive = ODrive()
 
         if (my_drive.is_connected):
+            my_drive.clear_errors()
             if (my_drive.calibrate()):
                 if (my_drive.engage_motors()):
                     setup_node()
