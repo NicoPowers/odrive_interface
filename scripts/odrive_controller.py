@@ -35,7 +35,11 @@ def watchdog():
 
             if (abs(now.to_sec() - last_time.to_sec()) > watchdog_timeout):
                 watchdog_timer_expired = True
-                my_drive.disengage_motors()            
+                my_drive.disengage_motors()
+                response = input("ERROR: Watchdog Timer expired.\nPress 'Enter' to reset Watchdog Timer: ")
+                if (response == ""):
+                    my_drive.engage_motors()
+                    watchdog_timer_expired = False            
 
             time.sleep(0.1)
 
@@ -50,13 +54,7 @@ def velocity_callback(data: VelocityControl):
     if (not communication_started):
         communication_started = True
 
-    if (watchdog_timer_expired):        
-        response = input("ERROR: Watchdog Timer expired.\nPress 'Enter' to reset Watchdog Timer: ")
-        if (response == ""):
-            my_drive.engage_motors()
-            watchdog_timer_expired = False
-
-    else:
+    if (not watchdog_timer_expired):        
         my_drive.set_velocity(0, -data.axis0_velocity)
         my_drive.set_velocity(1, data.axis1_velocity)
 
