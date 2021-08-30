@@ -34,6 +34,7 @@ def watchdog():
             now = rospy.get_rostime()
 
             if (abs(now.to_sec() - last_time.to_sec()) > watchdog_timeout):
+                print("ERROR: Watchdog Timer expired.\n")
                 watchdog_timer_expired = True
                 my_drive.disengage_motors()        
 
@@ -43,22 +44,21 @@ def velocity_callback(data: VelocityControl):
     global my_drive, last_time, watchdog_timer_expired, communication_started
     
     print("STATUS: Received velocity for axis 0: {}".format(data.axis0_velocity))
-    print("STATUS: Received velocity for axis 1: {}".format(data.axis1_velocity))        
-    
-    last_time = rospy.get_rostime()
+    print("STATUS: Received velocity for axis 1: {}".format(data.axis1_velocity))            
 
     if (not communication_started):
         communication_started = True
 
-    if (not watchdog_timer_expired):        
+    if (watchdog_timer_expired):
+        my_drive.engage_motors()
+        watchdog_timer_expired = False        
+    else:      
         my_drive.set_velocity(0, -data.axis0_velocity)
         my_drive.set_velocity(1, data.axis1_velocity)
-    else:
-        response = input("ERROR: Watchdog Timer expired.\nPress 'Enter' to reset Watchdog Timer: ")
-        if (response == ""):
-            my_drive.engage_motors()
-            watchdog_timer_expired = False
-            last_time = rospy.get_rostime()    
+
+    last_time = rospy.get_rostime()    
+        
+  
 
 def setup_node():    
     rospy.init_node('odrive_interface')
