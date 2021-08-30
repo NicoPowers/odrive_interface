@@ -37,7 +37,7 @@ class ODrive:
 
 
     def __has_errors(self):
-        if (self.__connected_odrive.axis0.error > 0 or self.__connected_odrive.axis1.error > 0 ):        
+        if (self.__connected_odrive.axis0.error > 0 or self.__connected_odrive.axis1.error > 0 or self.__connected_odrive.error > 0):        
             return True
         
         return False
@@ -62,18 +62,19 @@ class ODrive:
             return False
 
         # small delay to allow changes take place, but it may not be needed
-        sleep(0.25)
+        sleep(0.50)
 
         if (axis == 0):
             if (self.__connected_odrive.axis0.controller.config.control_mode != requested_control_mode):
-                print("ERROR: Requested control mode change for axis 0 could not resolve. \n")
-                dump_errors(self.__connected_odrive)
-                return False
+                print("ERROR: Requested control mode change for axis 0 could not resolve. \n")                                
         else:
             if (self.__connected_odrive.axis1.controller.config.control_mode != requested_control_mode):
                 print("ERROR: Requested control mode change for axis 1 could not resolve. \n")
-                dump_errors(self.__connected_odrive)
-                return False
+                dump_errors(self.__connected_odrive)                
+        
+        if (self.__has_errors()):
+            dump_errors(self.__connected_odrive)
+            return False
         
         return True
 
@@ -89,18 +90,20 @@ class ODrive:
             return False
 
         # small delay to allow changes take place, but it may not be needed
-        sleep(0.25)
+        sleep(0.50)
 
         if (axis == 0):
             if (self.__connected_odrive.axis0.current_state != requested_state):
-                print("ERROR: Requested state change for axis 0 could not resolve. \n")
-                dump_errors(self.__connected_odrive)
-                return False
+                print("ERROR: Requested state change for axis 0 could not resolve. \n")                
+                
         else:
             if (self.__connected_odrive.axis1.current_state != requested_state):
-                print("ERROR: Requested state change for axis 1 could not resolve. \n")
-                dump_errors(self.__connected_odrive)
-                return False
+                print("ERROR: Requested state change for axis 1 could not resolve. \n")                
+                
+        
+        if (self.__has_errors()):
+            dump_errors(self.__connected_odrive)
+            return False
         
         return True
         
