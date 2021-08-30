@@ -1,4 +1,4 @@
-# odrive_interface
+# odrive_interface for ROS Melodic
 
 
 This is an ODrive interface node made to run in ROS Melodic (Ubuntu 18.04)
