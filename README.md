@@ -1,5 +1,10 @@
 # odrive_interface for ROS Melodic
 
+TODO:
+1) Add more functionality to get current speed
+2) Allow for gearbox ratio input
+3) Allow for position mode as well as speed mode
+4) Add more ROS services to expose more functionality
 
 This is an ODrive interface node made to run in ROS Melodic (Ubuntu 18.04)
 
